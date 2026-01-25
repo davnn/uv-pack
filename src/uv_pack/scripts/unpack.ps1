@@ -20,7 +20,7 @@ function Find-Python($Root) {
   Get-ChildItem -Path $Root -Recurse -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -eq "python.exe" } |
     Select-Object -ExpandProperty FullName |
-    Sort-Object |
+    Sort-Object { $_.Length } |
     Select-Object -First 1
 }
 

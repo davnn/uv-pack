@@ -51,6 +51,7 @@ tasks:
         platforms: [windows]
         cmds:
             - task: unpack-windows-ps1
+            - powershell -NoProfile -Command "Remove-Item -Path '.\pack\.venv\','.\pack\.python' -Recurse -Force" 
             - task: unpack-windows-cmd
 
     unpack-windows-ps1:
@@ -58,7 +59,7 @@ tasks:
         platforms: [windows]
         cmds:
             - powershell -NoProfile -ExecutionPolicy Bypass -File .\\pack\\unpack.ps1
-            - powershell -Command "& .\\pack\\.venv\\Scripts\\python.exe -c \"import typer;\""
+            - powershell -NoProfile -Command "& '.\pack\.venv\Scripts\python.exe' -c 'import typer;'"
 
     unpack-windows-cmd:
         desc: "Create a pack and unpack it using CMD."
