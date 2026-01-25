@@ -15,6 +15,9 @@ on:
 
 env:
     UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # Ensures Python uses UTF-8 encoding by default (otherwise rich fails on Windows runners)
+    PYTHONUTF8: 1
 
 jobs:
     setup:
