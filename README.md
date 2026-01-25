@@ -33,7 +33,8 @@ Once installed, run using:
 uv run uv-pack --help
 # or as a tool
 uv tool run uv-pack --help
-uvx uv-pack --help # equivalent
+# or using uvx (equivalent)
+uvx uv-pack --help
 ```
 
 CLI
