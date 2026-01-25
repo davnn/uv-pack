@@ -74,6 +74,10 @@ tasks:
             -   task: typing
             -   task: test
 
+    setup:
+        desc: "Setup the uv environment"
+        cmd: uv sync --frozen
+
     build:
         desc: "Build the package to /dist"
         cmd: uv build

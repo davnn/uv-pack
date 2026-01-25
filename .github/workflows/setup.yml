@@ -35,7 +35,7 @@ jobs:
                   python-version: ${{ inputs.python }}
 
             - name: Install dependencies with uv
-              run: task uv-sync
+              run: task setup
 
             - name: Command
               run: ${{ inputs.command }}
