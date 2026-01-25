@@ -50,8 +50,8 @@ tasks:
         desc: "Create a pack and unpack it using PowerShell and CMD."
         platforms: [windows]
         cmds:
-            - task: test-windows-ps1
-            - task: test-windows-cmd
+            - task: unpack-windows-ps1
+            - task: unpack-windows-cmd
 
     unpack-windows-ps1:
         desc: "Create a pack and unpack it using PowerShell."
