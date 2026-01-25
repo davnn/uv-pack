@@ -35,7 +35,7 @@ if "%HAS_ARCHIVE%"=="1" (
     goto :found
   )
 
-  tar -C "%PY_DEST%" -xzf "%ARCHIVE%"
+  tar --force-local -C "%PY_DEST%" -xzf "%ARCHIVE%"
   echo Extracted python to %PY_DEST%
 
   for /f "delims=" %%P in (

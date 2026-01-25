@@ -40,7 +40,7 @@ if ($HasArchive) {
   $found = Find-Python $PyDest
 
   if (-not $found) {
-    tar -C $PyDest -xzf $Archive
+    tar --force-local -C $PyDest -xzf $Archive
     Write-Host "Extracted python to $PyDest"
     $found = Find-Python $PyDest
   }
