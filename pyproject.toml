@@ -1,0 +1,59 @@
+[project]
+name = "uv-pack"
+version = "0.0.0"
+description = "Pack you uv environment for offline usage."
+readme = "README.md"
+authors = [{ name = "David Muhr", email = "muhrdavid+github@gmail.com" }]
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Utilities",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS",
+    "Typing :: Typed"
+]
+dependencies = [
+    "requests>=2.32.5",
+    "typer>=0.21.1",
+]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.9.3",
+    "notebook>=7.5.2",
+    "pre-commit>=4.5.1",
+    "pyright>=1.1.408",
+    "ruff>=0.14.14",
+]
+
+[project.scripts]
+uv-pack = "uv_pack:main"
+
+[build-system]
+requires = ["uv_build>=0.9.25,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "strict"
+
+[tool.ruff]
+src = ["src"]
+extend-exclude = [".github"]
+target-version = "py310"
+line-length = 120
+lint.select = ["ALL"]
+lint.ignore = ["D401", "D213", "D211", "S603", "PLR0913", "PERF402", "FBT001", "FBT003", "B008", "PGH003"]

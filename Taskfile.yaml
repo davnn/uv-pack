@@ -1,0 +1,83 @@
+version: "3"
+
+vars:
+    SOURCES: src tests
+
+tasks:
+    pre-commit-install:
+        cmd: uv run pre-commit install
+
+    pre-commit-all:
+        cmd: uv run pre-commit run --all-files
+
+    lint:
+        desc: "Check code formatting and linting issues using Black and Ruff."
+        cmds:
+            - uv run ruff check  --config pyproject.toml
+
+    safety:
+        cmds:
+            - uv run bandit -ll --recursive src/{{.PROJECT}} {{.TESTS}}
+
+    format:
+        desc: "Format code using Black and fix linting issues with Ruff."
+        cmds:
+            - uv run ruff check --config pyproject.toml --fix
+
+    typing:
+        desc: "Perform type checking."
+        cmd: uv run pyright
+
+    typing-quality:
+        desc: "Check type completeness of the external fastsort API."
+        cmd: uv run pyright --ignoreexternal --verifytypes uv_pack
+
+    test:
+        desc: "Create a pack and unpack it using platform scripts."
+        cmds:
+            - uv run --isolated --no-editable uv-pack
+            - task: unpack-posix
+            - task: unpack-windows
+
+    unpack-posix:
+        desc: "Create a pack and unpack it using the POSIX script."
+        platforms: [linux, darwin]
+        cmds:
+            - sh ./pack/unpack.sh
+            - ./pack/.venv/bin/python -c "import typer;"
+
+    unpack-windows:
+        desc: "Create a pack and unpack it using PowerShell and CMD."
+        platforms: [windows]
+        cmds:
+            - task: test-windows-ps1
+            - task: test-windows-cmd
+
+    unpack-windows-ps1:
+        desc: "Create a pack and unpack it using PowerShell."
+        platforms: [windows]
+        cmds:
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\\pack\\unpack.ps1
+            - powershell -Command "& .\\pack\\.venv\\Scripts\\python.exe -c \"import typer;\""
+
+    unpack-windows-cmd:
+        desc: "Create a pack and unpack it using CMD."
+        platforms: [windows]
+        cmds:
+            - cmd /c pack\\unpack.cmd
+            - cmd /c pack\\.venv\\Scripts\\python.exe -c "import typer;"
+
+    check:
+        desc: "Run a linting, type checking, and tests."
+        cmds:
+            -   task: lint
+            -   task: typing
+            -   task: test
+
+    build:
+        desc: "Build the package to /dist"
+        cmd: uv build
+
+    publish:
+        desc: "Publish the built package from /dist"
+        cmd: uv publish

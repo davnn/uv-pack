@@ -1,0 +1,42 @@
+name: Setup
+
+on:
+    workflow_call:
+        inputs:
+            python:
+                required: true
+                type: string
+            os:
+                required: true
+                type: string
+            command:
+                required: true
+                type: string
+
+env:
+    UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+jobs:
+    setup:
+        runs-on: ${{ inputs.os }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install Task
+              uses: arduino/setup-task@v1
+              with:
+                  version: 3.x
+                  repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Install UV
+              uses: astral-sh/setup-uv@v6
+              with:
+                  enable-cache: true
+                  python-version: ${{ inputs.python }}
+
+            - name: Install dependencies with uv
+              run: task uv-sync
+
+            - name: Command
+              run: ${{ inputs.command }}
+              shell: bash

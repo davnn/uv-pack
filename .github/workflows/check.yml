@@ -1,0 +1,25 @@
+name: Check
+
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        types: [ opened, reopened, synchronize ]
+
+jobs:
+    check:
+        permissions:
+            # Give the default GITHUB_TOKEN write permission to commit and push the
+            # added or changed files to the repository.
+            contents: write
+
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ ubuntu-latest, windows-latest, macos-latest ]
+                python: [ "3.10", "3.11", "3.12", "3.13" ]
+        uses: ./.github/workflows/setup.yml
+        with:
+            os: ${{ matrix.os }}
+            python: ${{ matrix.python }}
+            command: task check
