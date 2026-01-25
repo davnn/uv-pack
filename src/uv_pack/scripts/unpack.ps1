@@ -41,7 +41,7 @@ if ($HasArchive) {
 
   if (-not $found) {
     tar -C $PyDest -xzf $Archive
-    Write-Host "✔ Extracted python"
+    Write-Host "Extracted python to $PyDest"
     $found = Find-Python $PyDest
   }
 
@@ -81,4 +81,4 @@ try {
 
 Write-Host "Done."
 Write-Host "Activate with:"
-Write-Host "  $VenvDir\Scripts\Activate.ps1"
+Write-Host "  $(Join-Path $VenvDir 'Scripts\Activate.ps1')"

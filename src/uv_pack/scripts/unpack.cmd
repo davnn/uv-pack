@@ -1,5 +1,5 @@
 @echo off
-setlocal ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
+setlocal ENABLEEXTENSIONS
 
 set "PACK_DIR=%~dp0"
 set "REQ_FILE=%PACK_DIR%requirements.txt"
@@ -36,7 +36,7 @@ if "%HAS_ARCHIVE%"=="1" (
   )
 
   tar -C "%PY_DEST%" -xzf "%ARCHIVE%"
-  echo ✔ Extracted python
+  echo Extracted python to %PY_DEST%
 
   for /f "delims=" %%P in (
     'dir /s /b /o:n "%PY_DEST%\python.exe" 2^>nul'

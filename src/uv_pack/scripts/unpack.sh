@@ -34,7 +34,7 @@ if [ "$HAS_ARCHIVE" -eq 1 ]; then
 
   if [ -z "$BASE_PY" ]; then
     tar -C "$PY_DEST" -xzf "$ARCHIVE"
-    say "✔ Extracted python"
+    say "Extracted python to $PY_DEST"
     BASE_PY="$(find_python "$PY_DEST")"
   fi
 fi
