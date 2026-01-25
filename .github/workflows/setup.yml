@@ -40,6 +40,12 @@ jobs:
             - name: Install dependencies with uv
               run: task setup
 
-            - name: Command
+            - name: Command (bash)
+              if: runner.os != 'Windows'
               run: ${{ inputs.command }}
               shell: bash
+
+            - name: Command (pwsh)
+              if: runner.os == 'Windows'
+              run: ${{ inputs.command }}
+              shell: pwsh
