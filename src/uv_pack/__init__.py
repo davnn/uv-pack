@@ -33,7 +33,7 @@ from ._unpack import copy_unpack_scripts
 # -----------------------------------------------------------------------------
 
 app: typer.Typer = typer.Typer()
-console: Console = Console(stderr=True)
+console = Console(force_terminal=True, legacy_windows=False)
 
 
 def main() -> None:
@@ -238,7 +238,7 @@ def pack(
         console.print(f"[green]✔ Cleaned[/green] output directory '{output_directory}'")
 
     output_directory.mkdir(exist_ok=True, parents=True)
-    (output_directory / ".gitignore").write_text("*")
+    (output_directory / ".gitignore").write_text("*", encoding="utf-8")
 
     requirements_file = export_requirements(
         output_directory=output_directory,

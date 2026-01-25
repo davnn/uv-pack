@@ -110,8 +110,12 @@ def session_with_retries() -> requests.Session:
     session = requests.Session()
     session.headers.update({
         "User-Agent": "venv-pack-download",
-        "Accept": "*/*",
+        "Accept": "application/vnd.github+json",
     })
+
+    # authenticate to GitHub API to prevent rate-limiting
+    if token := os.getenv("GITHUB_TOKEN"):
+        session.headers["Authorization"] = f"Bearer {token}"
 
     retries = Retry(
         total=5,

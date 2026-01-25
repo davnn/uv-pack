@@ -102,5 +102,9 @@ can be used to customize the target python and venv diretory.
 Configuration
 -------------
 
-`UV_PYTHON_INSTALL_MIRROR` can override the Python download API endpoint, default is:
+`UV_PYTHON_INSTALL_MIRROR` can override the GitHub API endpoint to retrieve the
+Python releases, default is:
 <https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest>.
+
+`GITHUB_TOKEN` can be used to authenticate the request to the GitHub API to
+prevent possible rate-limiting.
