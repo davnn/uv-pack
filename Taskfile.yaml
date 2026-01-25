@@ -64,8 +64,8 @@ tasks:
         desc: "Create a pack and unpack it using CMD."
         platforms: [windows]
         cmds:
-            - cmd /c pack\\unpack.cmd
-            - cmd /c pack\\.venv\\Scripts\\python.exe -c "import typer;"
+            - cmd /c .\\pack\\unpack.cmd
+            - cmd /c .\\pack\\.venv\\Scripts\\python.exe -c "import typer;"
 
     check:
         desc: "Run a linting, type checking, and tests."

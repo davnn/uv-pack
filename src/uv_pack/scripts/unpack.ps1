@@ -2,7 +2,7 @@
 param(
   [string]$VenvDir = $env:VENV_DIR,
   [string]$BasePy  = $env:BASE_PY,
-  [string]$PyDest  = $env:PY_DEST,
+  [string]$PyDest  = $env:PY_DEST
 )
 
 $ErrorActionPreference = "Stop"

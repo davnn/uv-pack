@@ -85,13 +85,13 @@ POSIX (sh/bash/zsh):
 PowerShell:
 
 ```powershell
-.\pack\unpack.ps1 -VenvDir <path>
+.\pack\unpack.ps1
 ```
 
 Windows cmd:
 
 ```cmd
-pack\unpack.cmd
+.\pack\unpack.cmd
 ```
 
 All scripts also accept `VENV_DIR`, `PY_DEST` and `BASE_PY` environment variables.
