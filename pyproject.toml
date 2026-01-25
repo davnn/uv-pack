@@ -3,6 +3,8 @@ name = "uv-pack"
 version = "0.0.0"
 description = "Pack you uv environment for offline usage."
 readme = "README.md"
+homepage = "https://github.com/davnn/uv-pack"
+repository = "https://github.com/davnn/uv-pack"
 authors = [{ name = "David Muhr", email = "muhrdavid+github@gmail.com" }]
 requires-python = ">=3.10"
 classifiers = [
