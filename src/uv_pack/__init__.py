@@ -1,72 +1,80 @@
-"""uv-pack: Bundle a locked uv environment into an offline-installable bundle.
-
-Pipeline:
-1. Export locked requirements via uv
-2. Download third-party wheels into ./wheels
-3. Build local workspace packages into ./vendor
-4. Finalize requirements.txt for offline installation
-5. Download a python interpreter to ./python
-
-Result:
-    pack/
-      ├── requirements.txt
-      ├── wheels/   # third-party wheels
-      └── vendor/   # locally built wheels
-      └── python/   # python interpreter
+"""
+uv-pack: Bundle a locked uv environment into an offline-installable bundle.
 """
 
 import shutil
 import sys
+from enum import Enum
 from pathlib import Path
-from typing import Literal
+from typing import Iterable, Literal, Optional
 
 import typer
 from packaging.utils import parse_wheel_filename
 from rich.console import Console
 
-from ._download import download_with_progress, find_latest_python_build, resolve_platform, session_with_retries
-from ._process import exit_on_error, run_cmd
+from ._download import (
+    download_with_progress,
+    find_latest_python_build,
+    resolve_platform,
+    session_with_retries,
+)
+from ._process import exit_on_error, run_cmd, progress_spinner
 from ._unpack import copy_unpack_scripts
 
 # -----------------------------------------------------------------------------
 # CLI setup
 # -----------------------------------------------------------------------------
 
-app: typer.Typer = typer.Typer()
+app = typer.Typer(add_completion=True)
 console = Console(force_terminal=True, legacy_windows=False)
 
 
 def main() -> None:
-    """Main entry point. Defaults to `pack`."""
     app()
 
 
-def get_version() -> str:
-    """Return the package version or "unknown" if no version can be found."""
-    from importlib import metadata  # noqa: PLC0415
+# -----------------------------------------------------------------------------
+# Step model
+# -----------------------------------------------------------------------------
 
-    try:
-        return metadata.version(__name__)
-    except metadata.PackageNotFoundError:  # pragma: no cover
-        return "unknown"
+class Step(str, Enum):
+    clean = "clean"
+    export = "export"
+    download = "download"
+    build = "build"
+    python = "python"
+    scripts = "scripts"
+
+
+PIPELINE_ORDER: tuple[Step, ...] = (
+    Step.clean,
+    Step.export,
+    Step.download,
+    Step.build,
+    Step.python,
+    Step.scripts,
+)
+
+
+def normalize_steps(steps: Optional[Iterable[Step]]) -> list[Step]:
+    if not steps:
+        return list(PIPELINE_ORDER)
+
+    selected = set(steps)
+    return [step for step in PIPELINE_ORDER if step in selected]
 
 
 # -----------------------------------------------------------------------------
 # Core operations
 # -----------------------------------------------------------------------------
 
-
 def export_requirements(
     *,
-    output_directory: Path,
+    requirements_file: Path,
     include_dev: bool,
     other_args: str,
-) -> Path:
-    """Export a frozen requirements.txt using uv and prepend index URLs."""
-    output_directory.mkdir(parents=True, exist_ok=True)
-    requirements_file = output_directory / "requirements.txt"
-
-    cmd: list[str] = [
+) -> None:
+    cmd = [
         "uv",
         "export",
         "--quiet",
@@ -78,14 +86,31 @@ def export_requirements(
 
     if not include_dev:
         cmd.append("--no-dev")
-    for arg in other_args.split():
-        cmd.append(arg)
 
-    result = run_cmd(cmd, cmd_name="uv export")
-    exit_on_error(result, console)
+    cmd.extend(other_args.split())
+    exit_on_error(run_cmd(cmd, "uv export"), console)
 
-    return requirements_file
 
+def export_vendor(
+    *,
+    requirements_file: Path,
+    other_args: str,
+) -> None:
+    cmd = [
+        "uv",
+        "export",
+        "--quiet",
+        "--no-header",
+        "--no-hashes",
+        "--no-annotate",
+        "--no-editable",
+        "--only-emit-local",
+        "--format=requirements.txt",
+        f"--output-file={requirements_file}",
+    ]
+
+    cmd.extend(other_args.split())
+    exit_on_error(run_cmd(cmd, "uv export"), console)
 
 def download_third_party_wheels(
     *,
@@ -93,10 +118,6 @@ def download_third_party_wheels(
     wheels_directory: Path,
     other_args: str,
 ) -> None:
-    """Download third-party binary wheels using pip via uv.
-
-    Wheels are stored in ./wheels.
-    """
     wheels_directory.mkdir(parents=True, exist_ok=True)
 
     cmd = [
@@ -109,56 +130,22 @@ def download_third_party_wheels(
         "-d", str(wheels_directory),
     ]
 
-    for arg in other_args.split():
-        cmd.append(arg)
-
-    result = run_cmd(cmd, cmd_name="pip download")
-    exit_on_error(result, console)
+    cmd.extend(other_args.split())
+    exit_on_error(run_cmd(cmd, "pip download"), console)
 
 
-def build_vendor_wheels(*, vendor_directory: Path, other_args: str) -> None:
-    """Build wheels for all local workspace packages.
-
-    Wheels are stored in ./vendor.
-    """
-    vendor_directory.mkdir(parents=True, exist_ok=True)
-
+def build_src_wheel(*, source_path: Path, out_path: Path, other_args: str) -> None:
     cmd = [
         "uv",
         "build",
-        "--all-packages",
+        str(source_path),
         "--wheel",
         "--out-dir",
-        str(vendor_directory),
+        str(out_path),
     ]
 
-    for arg in other_args.split():
-        cmd.append(arg)
-
-    result = run_cmd(cmd, cmd_name="uv build")
-    exit_on_error(result, console)
-
-
-def build_src_wheel(*, sdist_file: Path, other_args: str) -> None:
-    """Build wheel for all identified source distribution.
-
-    Wheels is stored in ./wheels.
-    """
-    wheels_dir = sdist_file.parent
-    cmd = [
-        "uv",
-        "build",
-        str(sdist_file),
-        "--wheel",
-        "--out-dir",
-        str(wheels_dir),
-    ]
-
-    for arg in other_args.split():
-        cmd.append(arg)
-
-    result = run_cmd(cmd, cmd_name="uv build")
-    exit_on_error(result, console)
+    cmd.extend(other_args.split())
+    exit_on_error(run_cmd(cmd, f"uv build"), console)
 
 
 def finalize_requirements(
@@ -166,14 +153,12 @@ def finalize_requirements(
     requirements_file: Path,
     vendor_directory: Path,
 ) -> None:
-    """Finalize requirements.txt to pin vendor wheels."""
     vendor_pins: list[str] = []
 
     for wheel in vendor_directory.glob("*.whl"):
         name, version, *_ = parse_wheel_filename(wheel.name)
         vendor_pins.append(f"{name}=={version}")
 
-    original = requirements_file.read_text(encoding="utf-8")
     footer = "\n".join(
         [
             "# This part was autogenerated by uv-pack via the following command:",
@@ -183,7 +168,7 @@ def finalize_requirements(
     )
 
     requirements_file.write_text(
-        original + footer,
+        requirements_file.read_text(encoding="utf-8") + footer,
         encoding="utf-8",
     )
 
@@ -206,7 +191,8 @@ def download_latest_python_build(
         target_format=target_format,
         session=session,
     )
-    console.print(f"[dim]Resolved asset:[/dim] {url}")
+    if False:
+        console.print(f"[dim]Resolved asset:[/dim] {url}")
     return download_with_progress(
         url=url,
         dest_dir=dest_dir,
@@ -219,84 +205,93 @@ def download_latest_python_build(
 # Orchestration command
 # -----------------------------------------------------------------------------
 
-
 @app.command()
 def pack(
     *,
-    output_directory: Path = typer.Argument(Path("./pack"), help="Directory to store packed environment"),
-    uv_export: str = typer.Option("", help="Extra arguments passed to `uv export`"),
-    pip_download: str = typer.Option("", help="Extra arguments passed to `pip download`"),
-    uv_build_sdist: str = typer.Option("", help="Extra arguments passed to `uv build` for downloaded sdists"),
-    uv_build_pkg: str = typer.Option("", help="Extra arguments passed to `uv build` for local packages"),
-    clean: bool = typer.Option(True, help="Remove the build directory"),
-    system: bool = typer.Option(False, help="Use system interpreter on target machine"),
-    include_dev: bool = typer.Option(False, help="Include development dependencies"),
+    steps: Optional[list[Step]] = typer.Argument(
+        PIPELINE_ORDER,
+        help="Comma-separated pipeline steps to run",
+    ),
+    output_directory: Path = typer.Option(Path("./pack"), help="Path to output directory"),
+    uv_export: str = typer.Option(""),
+    pip_download: str = typer.Option(""),
+    uv_build: str = typer.Option(""),
+    system: bool = typer.Option(False),
+    include_dev: bool = typer.Option(False),
+    verbose: bool = typer.Option(False),
 ) -> None:
     """Pack a locked uv environment into an offline-installable bundle."""
-    if clean:
+    selected_steps = normalize_steps(steps)
+    console.print(f"[dim]Running steps:[/dim] {[step.value for step in selected_steps]}")
+
+    if Step.clean in selected_steps:
         shutil.rmtree(output_directory, ignore_errors=True)
         console.print(f"[green]✔ Cleaned[/green] output directory '{output_directory}'")
 
-    output_directory.mkdir(exist_ok=True, parents=True)
+    output_directory.mkdir(parents=True, exist_ok=True)
     (output_directory / ".gitignore").write_text("*", encoding="utf-8")
 
-    requirements_file = export_requirements(
-        output_directory=output_directory,
-        include_dev=include_dev,
-        other_args=uv_export,
-    )
-    console.print(f"[green]✔ Exported[/green] requirements file to '{requirements_file}'")
-
+    requirements_file = output_directory / "requirements.txt"
     wheels_dir = output_directory / "wheels"
+    wheels_dir.mkdir(exist_ok=True)
     vendor_dir = output_directory / "vendor"
+    vendor_dir.mkdir(exist_ok=True)
+    vendor_requirements_file = vendor_dir / "requirements.txt"
     python_dir = output_directory / "python"
 
-    download_third_party_wheels(
-        requirements_file=requirements_file,
-        wheels_directory=wheels_dir,
-        other_args=pip_download,
-    )
-    console.print(f"[green]✔ Downloaded[/green] third party wheels to '{wheels_dir}'")
-
-    sdist_files = list(wheels_dir.glob("*.tar.gz"))
-    if (n_src := len(sdist_files)) > 0:
-        console.print(f"[dim]Identified {n_src} source distributions to build...[/dim]'")
-        for file in sdist_files:
-            build_src_wheel(
-                sdist_file=file,
-                other_args=uv_build_sdist,
+    if Step.export in selected_steps:
+        with progress_spinner("uv export"):
+            export_requirements(
+                requirements_file=requirements_file,
+                include_dev=include_dev,
+                other_args=uv_export,
             )
-            file.unlink()
-            console.print(f"[green]✔ Built[/green] wheel for source '{file}'")
+            export_vendor(
+                requirements_file=vendor_requirements_file,
+                other_args=uv_export,
+            )
 
-    build_vendor_wheels(
-        vendor_directory=vendor_dir,
-        other_args=uv_build_pkg,
-    )
-    console.print(f"[green]✔ Built[/green] vendor wheels to '{vendor_dir}'")
 
-    finalize_requirements(
-        requirements_file=requirements_file,
-        vendor_directory=vendor_dir,
-    )
+    if Step.download in selected_steps:
+        with progress_spinner("pip download"):
+            if not requirements_file.exists():
+                # TODO: Nice error message here.
+                raise typer.Exit()
 
-    platform = resolve_platform(console)
-    console.print(f"[dim]Resolved target platform:[/dim] {platform}")
+            download_third_party_wheels(
+                requirements_file=requirements_file,
+                wheels_directory=wheels_dir,
+                other_args=pip_download,
+            )
 
-    python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
-    console.print(f"[dim]Resolved python version:[/dim] {python_version}")
+    if Step.build in selected_steps:
+        with progress_spinner("uv build"):
+            if not vendor_requirements_file.exists():
+                # TODO: Nice error message here
+                raise typer.Exit()
 
-    python_path = None
-    if system:
-        console.print("[dim]Found '--system', skipping Python interpreter download[/dim]")
-    else:
-        python_path = download_latest_python_build(
+            for line in vendor_requirements_file.read_text(encoding="utf-8").splitlines():
+                build_src_wheel(source_path=Path(line), out_path=vendor_dir, other_args=uv_build)
+
+            for sdist in wheels_dir.glob("*.tar.gz"):
+                build_src_wheel(source_path=sdist, out_path=wheels_dir, other_args=uv_build)
+                sdist.unlink(missing_ok=True)
+
+            finalize_requirements(
+                requirements_file=requirements_file,
+                vendor_directory=vendor_dir,
+            )
+
+    if Step.python in selected_steps and not system:
+        platform = resolve_platform(console)
+        python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
+        download_latest_python_build(
             python_version=python_version,
             target_arch=platform,
             dest_dir=python_dir,
         )
-        console.print(f"[green]✔ Downloaded[/green] interpreter to '{python_path}'")
 
-    copy_unpack_scripts(output_directory=output_directory)
-    console.print(f"[green]✔ Unpack[/green] scripts copied to '{output_directory}'")
-    console.print(f"[green]✔ Packed[/green] environment '{output_directory}'")
+    if Step.scripts in selected_steps:
+        copy_unpack_scripts(output_directory=output_directory)
+
+    console.print("[green]✔ Done[/green]")

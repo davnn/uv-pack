@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -18,19 +19,25 @@ class CommandOutput:
     stderr: str
     returncode: int
 
-def run_cmd(cmd: list[str], *, cmd_name: str) -> CommandOutput:
-    """Execute a subprocess command and capture output."""
+
+@contextmanager
+def progress_spinner(cmd_name: str):
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
     ) as progress:
         progress.add_task(f"Running '{cmd_name}'...", total=None)
-        proc = subprocess.run(
-            cmd,
-            text=True,
-            capture_output=True,
-            check=False,
-        )
+        yield progress
+
+
+def run_cmd(cmd: list[str], cmd_name: str) -> CommandOutput:
+    """Execute a subprocess command and capture output."""
+    proc = subprocess.run(
+        cmd,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
     return CommandOutput(
         name=cmd_name,
         stdout=proc.stdout,
