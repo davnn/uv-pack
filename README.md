@@ -106,11 +106,12 @@ Configuration
 Python releases, default is:
 <https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest>.
 
-`GITHUB_TOKEN` can be used to authenticate the request to the GitHub API to
+`GITHUB_TOKEN` can be used to authenticate requests to the GitHub API to
 prevent possible rate-limiting.
 
 
 Limitations
 -----------
 
+- The build platform is expected to equal the usage platform, it is currently not possible to pack an environment for a different platform.
 - The project Python version is ignored when running ``uv-pack`` as a tool (``uv tool run`` or ``uvx``) and should be specified using ``uv tool run --python 3.11 uv-pack`` or ``uvx --python 3.11 uv-pack``, see [uv#uv5951](https://github.com/astral-sh/uv/issues/5951) and [uv#8206](https://github.com/astral-sh/uv/issues/8206). 

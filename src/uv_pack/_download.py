@@ -2,11 +2,11 @@ import os
 import platform
 import re
 from pathlib import Path
+import sys
 from typing import Literal
 from urllib.parse import unquote
 
 import requests
-import typer
 from requests.adapters import HTTPAdapter
 from rich.console import Console
 from rich.progress import (
@@ -20,9 +20,38 @@ from rich.progress import (
 )
 from urllib3.util.retry import Retry
 
+from uv_pack._logging import ConsoleError, Verbosity, console_print
+
+__all__ = [
+    "download_latest_python_build",
+]
+
 LATEST_RELEASE_API = (
     "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
 )
+
+def download_latest_python_build(
+    *,
+    dest_dir: Path,
+    target_format: Literal["install_only", "install_only_stripped"] = "install_only_stripped",
+) -> Path:
+    """Resolve and download the latest python-build-standalone artifact.
+
+    Returns the downloaded file path.
+    """
+    session = session_with_retries()
+    url = find_latest_python_build(
+        python_version=f"{sys.version_info.major}.{sys.version_info.minor}",
+        target_arch=resolve_platform(),
+        target_format=target_format,
+        session=session,
+    )
+    console_print(f"[dim]Resolved asset:[/dim] {url}", level=Verbosity.verbose)
+    return download_with_progress(
+        url=url,
+        dest_dir=dest_dir,
+        session=session,
+    )
 
 
 def find_latest_python_build(
@@ -92,7 +121,7 @@ def download_with_progress(
 
         with progress:
             task = progress.add_task(
-                "Downloading...",
+                "Running 'python'...",
                 total=total if total > 0 else None,
             )
 
@@ -131,8 +160,7 @@ def session_with_retries() -> requests.Session:
     return session
 
 
-def resolve_platform(console: Console | None = None) -> str:
-    console = console or Console()
+def resolve_platform() -> str:
     system = platform.system().lower()
     machine = platform.machine().lower()
 
@@ -154,5 +182,5 @@ def resolve_platform(console: Console | None = None) -> str:
     if system == "darwin":
         return f"{arch}-apple-darwin"
 
-    console.print(f"[bold red]Found unsupported platform:[/bold red] {system}")
-    raise typer.Exit(code=1)
+    msg = f"[bold red]✘ Found unsupported platform:[/bold red] {system}"
+    raise ConsoleError(msg)

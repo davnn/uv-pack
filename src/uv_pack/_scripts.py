@@ -5,6 +5,12 @@ import stat
 from importlib.resources import files
 from pathlib import Path
 
+from uv_pack._logging import Verbosity, console_print
+
+__all__ = [
+    "copy_unpack_scripts",
+]
+
 
 def copy_unpack_scripts(
     *,
