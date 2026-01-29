@@ -251,7 +251,7 @@ def pack(
             dest_dir=pack.python_dir,
         )
         console_print(
-            f"[green]✔ Downloaded[/green] '{python_path}'",
+            f"[green]✔ Python[/green] archive: '{python_path}'",
             level=Verbosity.verbose,
         )
 
