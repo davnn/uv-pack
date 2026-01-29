@@ -70,10 +70,10 @@ Pipeline steps:
 Example
 -------
 ```bash
+# run the entire pipeline (default) with verbose outputs
+uv-pack --verbose
 # only clean and export the requirements
 uv-pack clean export
-# skip the python download
-uv-pack --skip python
 ```
 
 Output layout
