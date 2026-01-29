@@ -145,7 +145,7 @@ Limitations
 FAQ
 -----------
 
-##### How do I pass extra options to `uv export` or another command?
+#### How do I pass extra options to `uv export` or another command?
 
 Use `--uv-export` to forward arguments, for example:
 
@@ -155,22 +155,22 @@ Use `--uv-export` to forward arguments, for example:
 
 The same is true for ``--uv-build`` and ``--pip-download`` arguments.
 
-##### How do I specify index-urls and extra-index-urls?
+#### How do I specify index-urls and extra-index-urls?
 
 The index urls set in ``pyproject.toml`` and ``uv.toml`` are not configured by default for the wheel
 download (``pip download``), you can specify them as:
 
 - ``uv-pack --pip-download "--index-url $MY_INDEX --extra-index-url $MY_EXTRA_INDEX"``
 
-##### How do I skip bundling Python?
+#### How do I skip bundling Python?
 
 Skip the `python` step: ``uv-pack --skip python``. When unpacking, set `BASE_PY` to a system Python path.
 
-##### How do I rerun without deleting the existing pack directory?
+#### How do I rerun without deleting the existing pack directory?
 
 Skip the `clean` step: ``uv-pack --skip clean``. Note that this automatically re-uses downloaded wheels
 and the downloaded Python interpreter.
 
-##### How do I only re-build my package if my pack is already complete?
+#### How do I only re-build my package if my pack is already complete?
 
 Run only ``uv-pack build``.
