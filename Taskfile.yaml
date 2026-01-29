@@ -1,7 +1,7 @@
 version: "3"
 
 vars:
-    SOURCES: src tests
+    SOURCES: src
 
 tasks:
     pre-commit-install:
@@ -14,15 +14,17 @@ tasks:
         desc: "Check code formatting and linting issues using Black and Ruff."
         cmds:
             - uv run ruff check  --config pyproject.toml
+            - uv run black --diff --check --config pyproject.toml {{.SOURCES}}
 
     safety:
         cmds:
-            - uv run bandit -ll --recursive src/{{.PROJECT}} {{.TESTS}}
+            - uv run bandit -ll --recursive {{.SOURCES}}
 
     format:
         desc: "Format code using Black and fix linting issues with Ruff."
         cmds:
             - uv run ruff check --config pyproject.toml --fix
+            - uv run black --config pyproject.toml {{.SOURCES}}
 
     typing:
         desc: "Perform type checking."
@@ -51,7 +53,7 @@ tasks:
         platforms: [windows]
         cmds:
             - task: unpack-windows-ps1
-            - powershell -NoProfile -Command "Remove-Item -Path '.\pack\.venv\','.\pack\.python' -Recurse -Force" 
+            - powershell -NoProfile -Command "Remove-Item -Path '.\pack\.venv\','.\pack\.python' -Recurse -Force"
             - task: unpack-windows-cmd
 
     unpack-windows-ps1:
