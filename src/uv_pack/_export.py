@@ -1,25 +1,24 @@
 from pathlib import Path
 
-from ._process import exit_on_error, run_cmd
+from uv_pack._process import exit_on_error, run_cmd
+
 
 def export_requirements(
     *,
     requirements_file: Path,
-    include_dev: bool,
     other_args: str,
 ) -> None:
     cmd = [
         "uv",
         "export",
         "--quiet",
+        "--no-dev",
+        "--no-header",
         "--no-hashes",
         "--no-emit-local",
         "--format=requirements.txt",
         f"--output-file={requirements_file}",
     ]
-
-    if not include_dev:
-        cmd.append("--no-dev")
 
     cmd.extend(other_args.split())
     exit_on_error(run_cmd(cmd, "uv export"))
@@ -34,6 +33,7 @@ def export_local_requirements(
         "uv",
         "export",
         "--quiet",
+        "--no-dev",
         "--no-header",
         "--no-hashes",
         "--no-annotate",

@@ -13,7 +13,6 @@ from uv_pack._logging import console_print
 
 @dataclass(frozen=True)
 class CommandOutput:
-
     """Captured subprocess execution result."""
 
     name: str

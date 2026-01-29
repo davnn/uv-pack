@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 __all__ = [
-    "PackLayout"
+    "PackLayout",
 ]
+
 
 @dataclass(frozen=True, slots=True)
 class PackLayout:

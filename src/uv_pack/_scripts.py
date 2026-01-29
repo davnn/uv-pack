@@ -5,8 +5,6 @@ import stat
 from importlib.resources import files
 from pathlib import Path
 
-from uv_pack._logging import Verbosity, console_print
-
 __all__ = [
     "copy_unpack_scripts",
 ]
@@ -18,7 +16,7 @@ def copy_unpack_scripts(
 ) -> None:
     """Write unpack scripts into the pack directory."""
     scripts_dir = files("uv_pack") / "scripts"
-    copy_file = lambda src: shutil.copyfile(str(src), str(output_directory / src.name)) # noqa: E731 # type: ignore
+    copy_file = lambda src: shutil.copyfile(str(src), str(output_directory / src.name))  # type: ignore
 
     output_directory.mkdir(parents=True, exist_ok=True)
     copy_file(scripts_dir / "unpack.sh")

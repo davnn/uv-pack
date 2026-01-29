@@ -28,14 +28,15 @@ classifiers = [
     "Typing :: Typed"
 ]
 dependencies = [
-    "packaging>=26.0",
-    "requests>=2.32.5",
-    "typer>=0.21.1",
+    "packaging>=24.0",
+    "requests>=2",
+    "typer>=0.19",
 ]
 
 [dependency-groups]
 dev = [
     "bandit>=1.9.3",
+    "black>=26.1.0",
     "notebook>=7.5.2",
     "pre-commit>=4.5.1",
     "pyright>=1.1.408",
@@ -59,4 +60,18 @@ extend-exclude = [".github"]
 target-version = "py310"
 line-length = 120
 lint.select = ["ALL"]
-lint.ignore = ["D401", "D213", "D211", "S603", "PLR0913", "PERF402", "FBT001", "FBT003", "B008", "PGH003"]
+lint.ignore = [
+    "ANN401",
+    "B008",
+    "D203",
+    "D211",
+    "D213",
+    "D401",
+    "E731",
+    "FBT001",
+    "FBT003",
+    "PERF402",
+    "PGH003",
+    "PLR0913",
+    "S603",
+]

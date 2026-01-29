@@ -5,20 +5,23 @@ from rich.console import Console
 from typer import Exit
 
 __all__ = [
+    "ConsoleError",
     "Verbosity",
     "console_print",
-    "ConsoleError",
     "set_verbosity",
 ]
 
 console = Console(legacy_windows=False)
+
 
 class Verbosity(Enum):
     quiet = 0
     normal = 1
     verbose = 2
 
+
 _internal_verbosity = Verbosity.normal
+
 
 def set_verbosity(mode: Verbosity) -> None:
     global _internal_verbosity  # noqa: PLW0603
@@ -35,6 +38,6 @@ def console_print(
 
 
 class ConsoleError(Exit):
-    def __init__(self, *objects: Any, **kwargs: Any):
+    def __init__(self, *objects: Any, **kwargs: Any) -> None:
         console.print(*objects, **kwargs)
         super().__init__(code=1)
