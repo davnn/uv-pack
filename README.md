@@ -57,8 +57,8 @@ Options:
 - `--pip-download`: extra args passed to `pip download`
 
 Notes:
-- `pack` is the main command; use `uv-pack --help` for full options.
-- Extra args are split on whitespace (for example: `--uv-export "--prerelease allow"`).
+- The CLI is structured into five pipeline steps, see description below.
+- Extra args are split on whitespace (for example: `--uv-export "--dev --all-extras"`).
 
 Pipeline steps:
 - `clean`: remove the output directory
