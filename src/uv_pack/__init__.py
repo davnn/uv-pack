@@ -91,7 +91,7 @@ def export_requirements(
     exit_on_error(run_cmd(cmd, "uv export"), console)
 
 
-def export_vendor(
+def export_local_requirements(
     *,
     requirements_file: Path,
     other_args: str,
@@ -173,6 +173,23 @@ def finalize_requirements(
     )
 
 
+def determine_download_requirements(
+    *,
+    requirements_file: Path,
+    wheels_directory: Path,
+) -> None:
+    available_wheels: list[str] = []
+
+    for wheel in wheels_directory.glob("*.whl"):
+        name, version, *_ = parse_wheel_filename(wheel.name)
+        available_wheels.append(f"{name}=={version}")
+
+    requirements_file.write_text(
+        "\n".join(sorted(set(available_wheels))),
+        encoding="utf-8",
+    )
+
+
 def download_latest_python_build(
     *,
     python_version: str,
@@ -231,54 +248,63 @@ def pack(
     output_directory.mkdir(parents=True, exist_ok=True)
     (output_directory / ".gitignore").write_text("*", encoding="utf-8")
 
-    requirements_file = output_directory / "requirements.txt"
+    requirements_txt = output_directory / "requirements.txt"
     wheels_dir = output_directory / "wheels"
-    wheels_dir.mkdir(exist_ok=True)
+    requirements_export_txt = wheels_dir / "requirements.txt"
     vendor_dir = output_directory / "vendor"
-    vendor_dir.mkdir(exist_ok=True)
-    vendor_requirements_file = vendor_dir / "requirements.txt"
+    requirements_local_txt = vendor_dir / "requirements.txt"
     python_dir = output_directory / "python"
 
     if Step.export in selected_steps:
         with progress_spinner("uv export"):
+            wheels_dir.mkdir(exist_ok=True)
+            vendor_dir.mkdir(exist_ok=True)
             export_requirements(
-                requirements_file=requirements_file,
+                requirements_file=requirements_export_txt,
                 include_dev=include_dev,
                 other_args=uv_export,
             )
-            export_vendor(
-                requirements_file=vendor_requirements_file,
+            export_local_requirements(
+                requirements_file=requirements_local_txt,
                 other_args=uv_export,
             )
 
 
     if Step.download in selected_steps:
         with progress_spinner("pip download"):
-            if not requirements_file.exists():
+            if not requirements_export_txt.exists():
                 # TODO: Nice error message here.
                 raise typer.Exit()
 
-            download_third_party_wheels(
-                requirements_file=requirements_file,
-                wheels_directory=wheels_dir,
-                other_args=pip_download,
-            )
+            with temporary_requirements(
+                wheels_dir=wheels_dir,
+                requirements_txt=requirements_export_txt,
+            ) as temp_requirements_path:
+                download_third_party_wheels(
+                    requirements_file=temp_requirements_path,
+                    wheels_directory=wheels_dir,
+                    other_args=pip_download,
+                )
 
     if Step.build in selected_steps:
         with progress_spinner("uv build"):
-            if not vendor_requirements_file.exists():
+            if not requirements_local_txt.exists():
                 # TODO: Nice error message here
                 raise typer.Exit()
 
-            for line in vendor_requirements_file.read_text(encoding="utf-8").splitlines():
+            for line in requirements_local_txt.read_text(encoding="utf-8").splitlines():
                 build_src_wheel(source_path=Path(line), out_path=vendor_dir, other_args=uv_build)
 
             for sdist in wheels_dir.glob("*.tar.gz"):
                 build_src_wheel(source_path=sdist, out_path=wheels_dir, other_args=uv_build)
                 sdist.unlink(missing_ok=True)
 
+            requirements_txt.write_text(
+                requirements_export_txt.read_text(encoding="utf-8"),
+                encoding="utf-8"
+            )
             finalize_requirements(
-                requirements_file=requirements_file,
+                requirements_file=requirements_txt,
                 vendor_directory=vendor_dir,
             )
 
