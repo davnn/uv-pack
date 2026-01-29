@@ -49,13 +49,12 @@ uv-pack [STEPS...]
 
 Options:
 - `STEPS`: subset of pipeline steps (default: `clean export download build python`)
-- `--skip`: skip a pipeline step (can be supplied multiple times)
-- `--output-directory`: path to output directory (default: `./pack`)
+- `-s, --skip`: skip a pipeline step (can be supplied multiple times)
+- `-o, --output-directory`: path to output directory (default: `./pack`)
+- `-v, --verbose`: show more detailed pack progress logging
+- `--uv-build`: extra args passed to `uv build`
 - `--uv-export`: extra args passed to `uv export`
 - `--pip-download`: extra args passed to `pip download`
-- `--uv-build`: extra args passed to `uv build`
-- `--include-dev`: include dev dependencies
-- `--verbose`: show per-package build progress
 
 Notes:
 - `pack` is the main command; use `uv-pack --help` for full options.
