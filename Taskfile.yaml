@@ -53,7 +53,7 @@ tasks:
         platforms: [windows]
         cmds:
             - task: unpack-windows-ps1
-            - powershell -NoProfile -Command "Remove-Item -Path '.\pack\.venv\','.\pack\.python' -Recurse -Force" 
+            - powershell -NoProfile -Command "Remove-Item -Path '.\pack\.venv\','.\pack\.python' -Recurse -Force"
             - task: unpack-windows-cmd
 
     unpack-windows-ps1:
