@@ -23,6 +23,7 @@ class CommandOutput:
 
 @contextmanager
 def run_step(cmd_name: str, *, should_run: bool = True) -> Iterator[Progress | None]:
+    """Context manager to show a progress display during step execution."""
     ctx = (
         Progress(
             SpinnerColumn(),

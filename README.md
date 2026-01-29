@@ -129,18 +129,23 @@ Python releases, default is:
 `GITHUB_TOKEN` can be used to authenticate requests to the GitHub API to
 prevent possible rate-limiting.
 
-
 Limitations
 -----------
 
-- The build platform is expected to equal the usage platform; it is currently not possible to pack an environment for a different platform.
-- The project Python version is ignored when running `uv-pack` as a tool (`uv tool run` or `uvx`) and should be specified using `uv tool run --python 3.11 uv-pack` or `uvx --python 3.11 uv-pack`, see [uv#uv5951](https://github.com/astral-sh/uv/issues/5951) and [uv#8206](https://github.com/astral-sh/uv/issues/8206).
-
+- The pack process must happen in the ``pyproject.toml`` or ``uv.toml`` directory, typically the repository root,
+  because ``uv`` exports relative paths to the project root.
+- The build platform is expected to equal the usage platform; it is currently not possible to pack an environment
+  for a different platform.
+- The project Python version is ignored when running `uv-pack` as a tool (`uv tool run` or `uvx`) and should be 
+  specified using `uv tool run --python 3.11 uv-pack` or `uvx --python 3.11 uv-pack`, see 
+  [uv#uv5951](https://github.com/astral-sh/uv/issues/5951) and [uv#8206](https://github.com/astral-sh/uv/issues/8206).
+- The download process can be slow because ``pip download`` is used as there is no native (parallel) uv download
+  option available for wheels, see [uv#3163](https://github.com/astral-sh/uv/issues/3163). 
 
 FAQ
 -----------
 
-##### How do I pass extra options to `uv export`?
+##### How do I pass extra options to `uv export` or another command?
 
 Use `--uv-export` to forward arguments, for example:
 
@@ -148,11 +153,24 @@ Use `--uv-export` to forward arguments, for example:
 - ``uv-pack --uv-export "--locked  --dev"`` to include dev-deps and ensure an up-to-date lock file
 - ``uv-pack --uv-export "--all-extras"`` to include all extra dependencies
 
+The same is true for ``--uv-build`` and ``--pip-download`` arguments.
+
+##### How do I specify index-urls and extra-index-urls?
+
+The index urls set in ``pyproject.toml`` and ``uv.toml`` are not configured by default for the wheel
+download (``pip download``), you can specify them as:
+
+- ``uv-pack --pip-download "--index-url $MY_INDEX --extra-index-url $MY_EXTRA_INDEX"``
+
 ##### How do I skip bundling Python?
 
 Skip the `python` step: ``uv-pack --skip python``. When unpacking, set `BASE_PY` to a system Python path.
 
 ##### How do I rerun without deleting the existing pack directory?
 
-Skip the `clean` step: ``uv-pack --skip clean``.
+Skip the `clean` step: ``uv-pack --skip clean``. Note that this automatically re-uses downloaded wheels
+and the downloaded Python interpreter.
 
+##### How do I only re-build my package if my pack is already complete?
+
+Run only ``uv-pack build``.

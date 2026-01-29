@@ -8,6 +8,8 @@ __all__ = [
 
 @dataclass(frozen=True, slots=True)
 class PackLayout:
+    """Layout of the output directory for a uv-pack."""
+
     output_directory: Path
     gitignore_file: Path
     requirements_txt: Path

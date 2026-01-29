@@ -29,6 +29,7 @@ def export_local_requirements(
     requirements_file: Path,
     other_args: str,
 ) -> None:
+    """Export only local packages to a plain requirements.txt file (each line is a local requirement path)."""
     cmd = [
         "uv",
         "export",
