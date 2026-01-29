@@ -34,9 +34,10 @@ uv run uv-pack --help
 You can also use ``uv-pack`` as a tool.
 
 ```bash
-uv tool run uv-pack --help
+# specify the python version!
+uv tool run --python 3.12 uv-pack --help
 # or using uvx (equivalent)
-uvx uv-pack --help
+uvx --python 3.12 uv-pack --help
 ```
 
 CLI
