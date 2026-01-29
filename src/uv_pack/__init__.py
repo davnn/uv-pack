@@ -6,7 +6,6 @@ Pipeline:
 3. Download third-party wheels into ./wheels
 4. Build local workspace packages into ./vendor
 5. Download a python interpreter to ./python
-6. Copy unpack scripts to output directory
 
 Result:
 pack/
@@ -43,7 +42,7 @@ from uv_pack._scripts import copy_unpack_scripts
 # CLI setup
 # -----------------------------------------------------------------------------
 
-app = typer.Typer(add_completion=True)
+app: typer.Typer = typer.Typer(add_completion=True)
 
 
 def main() -> None:

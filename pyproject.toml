@@ -1,6 +1,6 @@
 [project]
 name = "uv-pack"
-version = "0.0.1"
+version = "0.1.0"
 description = "Pack you uv environment for offline usage."
 readme = "README.md"
 homepage = "https://github.com/davnn/uv-pack"
