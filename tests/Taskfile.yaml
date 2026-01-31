@@ -23,9 +23,9 @@ tasks:
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
         cmds:
-            - rm -rf {{.FOLDER}} && mkdir {{.FOLDER}}
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
+            - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --package --no-workspace
+            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
             - sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import test_self;"'
@@ -37,9 +37,9 @@ tasks:
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
         cmds:
-            - rm -rf {{.FOLDER}} && mkdir {{.FOLDER}}
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
+            - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
+            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package --no-workspace
             - uv --directory {{.FOLDER}} add --editable ./a --no-workspace
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
@@ -53,9 +53,9 @@ tasks:
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
         cmds:
-            - rm -rf {{.FOLDER}} && mkdir {{.FOLDER}}
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
+            - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
+            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} add parse
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
             - sh {{.FOLDER}}/pack/unpack.sh
@@ -68,9 +68,9 @@ tasks:
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
         cmds:
-            - rm -rf {{.FOLDER}} && mkdir {{.FOLDER}}
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
+            - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
+            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package
             - uv --directory {{.FOLDER}} init b --package
             - uv --directory {{.FOLDER}} init c --package
@@ -87,9 +87,9 @@ tasks:
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
         cmds:
-            - rm -rf {{.FOLDER}} && mkdir {{.FOLDER}}
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
+            - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
+            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package --no-workspace
             - uv --directory {{.FOLDER}} add ./a --group extra --no-workspace
             - uv --directory {{.FOLDER}} add parse --group extra
@@ -104,9 +104,9 @@ tasks:
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
         cmds:
-            - rm -rf {{.FOLDER}} && mkdir {{.FOLDER}}
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
+            - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
+            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package --no-workspace
             - uv --directory {{.FOLDER}} add ./a --optional extra --no-workspace
             - uv --directory {{.FOLDER}} add parse --optional extra
