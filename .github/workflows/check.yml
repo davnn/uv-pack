@@ -17,4 +17,4 @@ jobs:
         with:
             os: ${{ matrix.os }}
             python: ${{ matrix.python }}
-            command: task check
+            command: task check && task tests:test
