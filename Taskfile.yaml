@@ -3,6 +3,9 @@ version: "3"
 vars:
     SOURCES: src
 
+includes:
+    tests: ./tests/Taskfile.yaml
+
 tasks:
     pre-commit-install:
         cmd: uv run pre-commit install
