@@ -18,6 +18,3 @@ jobs:
             os: ${{ matrix.os }}
             python: ${{ matrix.python }}
             command: task check && task tests:test
-        # Set the python location for use in the Taskfile tests
-        env:
-            BASE_PY: ${{ env.pythonLocation }}/bin/python

@@ -1,7 +1,8 @@
 version: '3'
 
 env:
-    BASE_PY: /usr/bin/python
+    BASE_PY:
+        sh: which python
 
 tasks:
     test:
