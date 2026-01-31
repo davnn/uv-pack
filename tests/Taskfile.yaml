@@ -2,7 +2,7 @@ version: '3'
 
 env:
     BASE_PY:
-        sh: which python
+        sh: uv python find --system
 
 tasks:
     test:
