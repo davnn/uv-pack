@@ -1,8 +1,13 @@
 version: '3'
 
 vars:
-    BASE_PY:
-        sh: which python
+  BASE_PY:
+    sh: |
+      if command -v uv >/dev/null 2>&1; then
+        uv python find
+      else
+        which python
+      fi
 
 tasks:
     test:
