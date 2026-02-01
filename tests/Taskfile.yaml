@@ -1,8 +1,8 @@
 version: '3'
 
-env:
+vars:
     BASE_PY:
-        sh: uv python find --system
+        sh: which python
 
 tasks:
     test:
@@ -28,7 +28,7 @@ tasks:
             - uv init {{.FOLDER}} --package --no-workspace
             - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - sh {{.FOLDER}}/pack/unpack.sh
+            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import test_self;"'
 
     test-editable:
@@ -44,7 +44,7 @@ tasks:
             - uv --directory {{.FOLDER}} init a --package --no-workspace
             - uv --directory {{.FOLDER}} add --editable ./a --no-workspace
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - sh {{.FOLDER}}/pack/unpack.sh
+            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import a;"'
 
     test-external:
@@ -59,7 +59,7 @@ tasks:
             - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} add parse
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - sh {{.FOLDER}}/pack/unpack.sh
+            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse;"'
 
     test-workspace:
@@ -78,7 +78,7 @@ tasks:
             - uv --directory {{.FOLDER}} add --package a b
             - uv --directory {{.FOLDER}} add --package b c
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--package a"
-            - sh {{.FOLDER}}/pack/unpack.sh
+            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import c;"'
 
     test-group:
@@ -95,7 +95,7 @@ tasks:
             - uv --directory {{.FOLDER}} add ./a --group extra --no-workspace
             - uv --directory {{.FOLDER}} add parse --group extra
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--group extra"
-            - sh {{.FOLDER}}/pack/unpack.sh
+            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse; import a;"'
 
     test-extra:
@@ -112,5 +112,5 @@ tasks:
             - uv --directory {{.FOLDER}} add ./a --optional extra --no-workspace
             - uv --directory {{.FOLDER}} add parse --optional extra
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--extra extra"
-            - sh {{.FOLDER}}/pack/unpack.sh
+            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse; import a;"'
