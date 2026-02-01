@@ -19,14 +19,11 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
-            BASE_PY:
-                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --package --no-workspace
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
+            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import test_self;"'
 
     test-editable:
@@ -35,16 +32,13 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
-            BASE_PY:
-                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package --no-workspace
             - uv --directory {{.FOLDER}} add --editable ./a --no-workspace
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
+            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import a;"'
 
     test-external:
@@ -53,15 +47,12 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
-            BASE_PY:
-                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} add parse
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
+            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse;"'
 
     test-workspace:
@@ -70,19 +61,16 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
-            BASE_PY:
-                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package
             - uv --directory {{.FOLDER}} init b --package
             - uv --directory {{.FOLDER}} init c --package
             - uv --directory {{.FOLDER}} add --package a b
             - uv --directory {{.FOLDER}} add --package b c
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--package a"
-            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
+            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import c;"'
 
     test-group:
@@ -91,17 +79,14 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
-            BASE_PY:
-                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package --no-workspace
             - uv --directory {{.FOLDER}} add ./a --group extra --no-workspace
             - uv --directory {{.FOLDER}} add parse --group extra
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--group extra"
-            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
+            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse; import a;"'
 
     test-extra:
@@ -110,15 +95,12 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
-            BASE_PY:
-                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} python pin {{.BASE_PY}}
             - uv --directory {{.FOLDER}} init a --package --no-workspace
             - uv --directory {{.FOLDER}} add ./a --optional extra --no-workspace
             - uv --directory {{.FOLDER}} add parse --optional extra
             - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--extra extra"
-            - export BASE_PY={{.BASE_PY}} && sh {{.FOLDER}}/pack/unpack.sh
+            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
             - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse; import a;"'
