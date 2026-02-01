@@ -1,14 +1,5 @@
 version: '3'
 
-vars:
-  BASE_PY:
-    sh: |
-      if command -v uv >/dev/null 2>&1; then
-        uv python find --managed-python 2>/dev/null || which python
-      else
-        which python
-      fi
-
 tasks:
     test:
         desc: Run all packaging tests in parallel
@@ -28,6 +19,8 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
+            BASE_PY:
+                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --package --no-workspace
@@ -42,6 +35,8 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
+            BASE_PY:
+                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
@@ -58,6 +53,8 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
+            BASE_PY:
+                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
@@ -73,6 +70,8 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
+            BASE_PY:
+                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
@@ -92,6 +91,8 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
+            BASE_PY:
+                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
@@ -109,6 +110,8 @@ tasks:
         dir: tests
         vars:
             FOLDER: '{{.TASK | splitList ":" | last}}'
+            BASE_PY:
+                sh: uv python find --managed-python
         cmds:
             - rm -rf {{.FOLDER}}
             - uv init {{.FOLDER}} --bare --no-workspace
