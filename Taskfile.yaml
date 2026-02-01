@@ -3,6 +3,9 @@ version: "3"
 vars:
     SOURCES: src
 
+includes:
+    tests: ./tests/Taskfile.yaml
+
 tasks:
     pre-commit-install:
         cmd: uv run pre-commit install
@@ -73,9 +76,9 @@ tasks:
     check:
         desc: "Run a linting, type checking, and tests."
         cmds:
-            -   task: lint
-            -   task: typing
-            -   task: test
+            - task: lint
+            - task: typing
+            - task: test
 
     setup:
         desc: "Setup the uv environment"
