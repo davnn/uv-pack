@@ -27,6 +27,8 @@ tasks:
     cmds:
       - rm -rf {{.FOLDER}}
       - task: setup:{{.FOLDER}}
+        vars:
+          FOLDER: '{{.FOLDER}}'
       - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python {{.UV_EXPORT | default ""}}
       - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
       - '{{.FOLDER}}/pack/.venv/bin/python -c "{{.IMPORTS}}"'
@@ -37,7 +39,7 @@ tasks:
     dir: "{{.TEST_DIR}}"
     internal: true
     cmds:
-      - uv init self --package --no-workspace
+      - uv init {{.FOLDER}} --package --no-workspace
     vars:
       IMPORTS: 'import test_self'
 
@@ -45,9 +47,9 @@ tasks:
     dir: "{{.TEST_DIR}}"
     internal: true
     cmds:
-      - uv init editable --bare --no-workspace
-      - uv --directory editable init a --package --no-workspace
-      - uv --directory editable add --editable ./a --no-workspace
+      - uv init {{.FOLDER}} --bare --no-workspace
+      - uv --directory {{.FOLDER}} init a --package --no-workspace
+      - uv --directory {{.FOLDER}} add --editable ./a --no-workspace
     vars:
       IMPORTS: 'import a'
 
@@ -55,8 +57,8 @@ tasks:
     dir: "{{.TEST_DIR}}"
     internal: true
     cmds:
-      - uv init external --bare --no-workspace
-      - uv --directory external add parse
+      - uv init {{.FOLDER}} --bare --no-workspace
+      - uv --directory {{.FOLDER}} add parse
     vars:
       IMPORTS: 'import parse'
 
@@ -64,12 +66,12 @@ tasks:
     dir: "{{.TEST_DIR}}"
     internal: true
     cmds:
-      - uv init workspace --bare --no-workspace
-      - uv --directory workspace init a --package
-      - uv --directory workspace init b --package
-      - uv --directory workspace init c --package
-      - uv --directory workspace add --package a b
-      - uv --directory workspace add --package b c
+      - uv init {{.FOLDER}} --bare --no-workspace
+      - uv --directory {{.FOLDER}} init a --package
+      - uv --directory {{.FOLDER}} init b --package
+      - uv --directory {{.FOLDER}} init c --package
+      - uv --directory {{.FOLDER}} add --package a b
+      - uv --directory {{.FOLDER}} add --package b c
     vars:
       UV_EXPORT: '--uv-export "--package a"'
       IMPORTS: 'import c'
@@ -78,10 +80,10 @@ tasks:
     dir: "{{.TEST_DIR}}"
     internal: true
     cmds:
-      - uv init group --bare --no-workspace
-      - uv --directory group init a --package --no-workspace
-      - uv --directory group add ./a --group extra --no-workspace
-      - uv --directory group add parse --group extra
+      - uv init {{.FOLDER}} --bare --no-workspace
+      - uv --directory {{.FOLDER}} init a --package --no-workspace
+      - uv --directory {{.FOLDER}} add ./a --group extra --no-workspace
+      - uv --directory {{.FOLDER}} add parse --group extra
     vars:
       UV_EXPORT: '--uv-export "--group extra"'
       IMPORTS: 'import parse; import a'
@@ -90,10 +92,10 @@ tasks:
     dir: "{{.TEST_DIR}}"
     internal: true
     cmds:
-      - uv init extra --bare --no-workspace
-      - uv --directory extra init a --package --no-workspace
-      - uv --directory extra add ./a --optional extra --no-workspace
-      - uv --directory extra add parse --optional extra
+      - uv init {{.FOLDER}} --bare --no-workspace
+      - uv --directory {{.FOLDER}} init a --package --no-workspace
+      - uv --directory {{.FOLDER}} add ./a --optional extra --no-workspace
+      - uv --directory {{.FOLDER}} add parse --optional extra
     vars:
       UV_EXPORT: '--uv-export "--extra extra"'
       IMPORTS: 'import parse; import a'
