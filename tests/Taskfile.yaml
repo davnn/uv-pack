@@ -4,7 +4,7 @@ vars:
   BASE_PY:
     sh: |
       if command -v uv >/dev/null 2>&1; then
-        uv python find
+        uv python find 2>/dev/null || which python
       else
         which python
       fi
