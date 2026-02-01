@@ -1,7 +1,7 @@
 name: 📝 Documentation improvement
 description: Something is erroneous, unclear or missing in the docs.
 title: "📝 <Please write a comprehensive title and keep the 📝 prefix>"
-labels: [ documentation ]
+labels: [documentation]
 
 body:
   - type: markdown
@@ -12,7 +12,7 @@ body:
     id: documentation-description
     attributes:
       label: Description
-      description: 'Explain how you would like to improve the docs here!'
+      description: "Explain how you would like to improve the docs here!"
     validations:
       required: true
   - type: checkboxes

@@ -1,7 +1,7 @@
 name: 🐛 Bug report
 description: Report an issue
 title: "🐛 <Please write a comprehensive title and keep the 🐛 prefix>"
-labels: [ bug ]
+labels: [bug]
 
 body:
   - type: markdown

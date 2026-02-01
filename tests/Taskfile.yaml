@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   TEST_DIR: tests
@@ -7,7 +7,6 @@ tasks:
   test:
     desc: Run all packaging tests in parallel
     platforms: [linux]
-    parallel: true
     deps:
       - test:self
       - test:editable
@@ -21,14 +20,14 @@ tasks:
   test:*:
     desc: Generic packaging test runner
     platforms: [linux]
-    dir: '{{.TEST_DIR}}'
+    dir: "{{.TEST_DIR}}"
     vars:
       FOLDER: "{{index .MATCH 0}}"
     cmds:
       - rm -rf {{.FOLDER}}
       - task: setup:{{.FOLDER}}
         vars:
-          FOLDER: '{{.FOLDER}}'
+          FOLDER: "{{.FOLDER}}"
       - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python {{.UV_EXPORT | default ""}}
       - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
       - '{{.FOLDER}}/pack/.venv/bin/python -c "{{.IMPORTS}}"'
@@ -41,7 +40,7 @@ tasks:
     cmds:
       - uv init {{.FOLDER}} --package --no-workspace
     vars:
-      IMPORTS: 'import test_self'
+      IMPORTS: "import test_self"
 
   setup:editable:
     dir: "{{.TEST_DIR}}"
@@ -51,7 +50,7 @@ tasks:
       - uv --directory {{.FOLDER}} init a --package --no-workspace
       - uv --directory {{.FOLDER}} add --editable ./a --no-workspace
     vars:
-      IMPORTS: 'import a'
+      IMPORTS: "import a"
 
   setup:external:
     dir: "{{.TEST_DIR}}"
@@ -60,7 +59,7 @@ tasks:
       - uv init {{.FOLDER}} --bare --no-workspace
       - uv --directory {{.FOLDER}} add parse
     vars:
-      IMPORTS: 'import parse'
+      IMPORTS: "import parse"
 
   setup:workspace:
     dir: "{{.TEST_DIR}}"
@@ -74,7 +73,7 @@ tasks:
       - uv --directory {{.FOLDER}} add --package b c
     vars:
       UV_EXPORT: '--uv-export "--package a"'
-      IMPORTS: 'import c'
+      IMPORTS: "import c"
 
   setup:group:
     dir: "{{.TEST_DIR}}"
@@ -86,7 +85,7 @@ tasks:
       - uv --directory {{.FOLDER}} add parse --group extra
     vars:
       UV_EXPORT: '--uv-export "--group extra"'
-      IMPORTS: 'import parse; import a'
+      IMPORTS: "import parse; import a"
 
   setup:extra:
     dir: "{{.TEST_DIR}}"
@@ -98,4 +97,4 @@ tasks:
       - uv --directory {{.FOLDER}} add parse --optional extra
     vars:
       UV_EXPORT: '--uv-export "--extra extra"'
-      IMPORTS: 'import parse; import a'
+      IMPORTS: "import parse; import a"

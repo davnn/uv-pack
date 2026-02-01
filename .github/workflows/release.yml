@@ -2,7 +2,7 @@ name: Release
 
 on:
     release:
-        types: [ published ]
+        types: [published]
     workflow_dispatch:
 
 jobs:
@@ -10,8 +10,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                os: [ ubuntu-latest ]
-                python: [ "3.10" ]
+                os: [ubuntu-latest]
+                python: ["3.10"]
         uses: ./.github/workflows/setup.yml
         secrets: inherit
         with:

@@ -1,7 +1,7 @@
 name: 🚀 Feature proposal or enhancement
 description: Propose a new feature or enhancement
 title: "🚀 <Please write a comprehensive title and keep the 🚀 prefix>"
-labels: [ feature ]
+labels: [feature]
 
 body:
   - type: markdown
@@ -12,14 +12,14 @@ body:
     id: feature-description
     attributes:
       label: Description of the problem
-      description: 'As a user I want [goal] so that [benefit]. If you want to contribute with a PR, tell us in the description. Thanks!'
+      description: "As a user I want [goal] so that [benefit]. If you want to contribute with a PR, tell us in the description. Thanks!"
     validations:
       required: true
   - type: textarea
     id: suggested-solution
     attributes:
       label: Solution
-      description: 'We could provide following implementation...'
+      description: "We could provide following implementation..."
     validations:
       required: true
   - type: checkboxes
