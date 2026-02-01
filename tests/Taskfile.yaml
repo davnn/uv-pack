@@ -1,106 +1,99 @@
 version: '3'
 
+vars:
+  TEST_DIR: tests
+
 tasks:
-    test:
-        desc: Run all packaging tests in parallel
-        platforms: [linux]
-        parallel: true
-        deps:
-        - test-self
-        - test-editable
-        - test-external
-        - test-workspace
-        - test-group
-        - test-extra
+  test:
+    desc: Run all packaging tests in parallel
+    platforms: [linux]
+    parallel: true
+    deps:
+      - test:self
+      - test:editable
+      - test:external
+      - test:workspace
+      - test:group
+      - test:extra
 
-    test-self:
-        desc: "Run tests for self-packaging installation"
-        platforms: [linux]
-        dir: tests
-        vars:
-            FOLDER: '{{.TASK | splitList ":" | last}}'
-        cmds:
-            - rm -rf {{.FOLDER}}
-            - uv init {{.FOLDER}} --package --no-workspace
-            - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
-            - '{{.FOLDER}}/pack/.venv/bin/python -c "import test_self;"'
+  # ---- Generic test ----
 
-    test-editable:
-        desc: "Run for a single editable installation"
-        platforms: [linux]
-        dir: tests
-        vars:
-            FOLDER: '{{.TASK | splitList ":" | last}}'
-        cmds:
-            - rm -rf {{.FOLDER}}
-            - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} init a --package --no-workspace
-            - uv --directory {{.FOLDER}} add --editable ./a --no-workspace
-            - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
-            - '{{.FOLDER}}/pack/.venv/bin/python -c "import a;"'
+  test:*:
+    desc: Generic packaging test runner
+    platforms: [linux]
+    dir: '{{.TEST_DIR}}'
+    vars:
+      FOLDER: "{{index .MATCH 0}}"
+    cmds:
+      - rm -rf {{.FOLDER}}
+      - task: setup:{{.FOLDER}}
+      - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python {{.UV_EXPORT | default ""}}
+      - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
+      - '{{.FOLDER}}/pack/.venv/bin/python -c "{{.IMPORTS}}"'
 
-    test-external:
-        desc: "Run tests for a single external installation"
-        platforms: [linux]
-        dir: tests
-        vars:
-            FOLDER: '{{.TASK | splitList ":" | last}}'
-        cmds:
-            - rm -rf {{.FOLDER}}
-            - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} add parse
-            - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python
-            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
-            - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse;"'
+  # ---- Test definitions ----
 
-    test-workspace:
-        desc: "Run tests for a workspace package"
-        platforms: [linux]
-        dir: tests
-        vars:
-            FOLDER: '{{.TASK | splitList ":" | last}}'
-        cmds:
-            - rm -rf {{.FOLDER}}
-            - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} init a --package
-            - uv --directory {{.FOLDER}} init b --package
-            - uv --directory {{.FOLDER}} init c --package
-            - uv --directory {{.FOLDER}} add --package a b
-            - uv --directory {{.FOLDER}} add --package b c
-            - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--package a"
-            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
-            - '{{.FOLDER}}/pack/.venv/bin/python -c "import c;"'
+  setup:self:
+    dir: "{{.TEST_DIR}}"
+    internal: true
+    cmds:
+      - uv init self --package --no-workspace
+    vars:
+      IMPORTS: 'import test_self'
 
-    test-group:
-        desc: "Run tests for groups being included during export"
-        platforms: [linux]
-        dir: tests
-        vars:
-            FOLDER: '{{.TASK | splitList ":" | last}}'
-        cmds:
-            - rm -rf {{.FOLDER}}
-            - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} init a --package --no-workspace
-            - uv --directory {{.FOLDER}} add ./a --group extra --no-workspace
-            - uv --directory {{.FOLDER}} add parse --group extra
-            - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--group extra"
-            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
-            - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse; import a;"'
+  setup:editable:
+    dir: "{{.TEST_DIR}}"
+    internal: true
+    cmds:
+      - uv init editable --bare --no-workspace
+      - uv --directory editable init a --package --no-workspace
+      - uv --directory editable add --editable ./a --no-workspace
+    vars:
+      IMPORTS: 'import a'
 
-    test-extra:
-        desc: "Run tests for extras being included during export"
-        platforms: [linux]
-        dir: tests
-        vars:
-            FOLDER: '{{.TASK | splitList ":" | last}}'
-        cmds:
-            - rm -rf {{.FOLDER}}
-            - uv init {{.FOLDER}} --bare --no-workspace
-            - uv --directory {{.FOLDER}} init a --package --no-workspace
-            - uv --directory {{.FOLDER}} add ./a --optional extra --no-workspace
-            - uv --directory {{.FOLDER}} add parse --optional extra
-            - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python --uv-export "--extra extra"
-            - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
-            - '{{.FOLDER}}/pack/.venv/bin/python -c "import parse; import a;"'
+  setup:external:
+    dir: "{{.TEST_DIR}}"
+    internal: true
+    cmds:
+      - uv init external --bare --no-workspace
+      - uv --directory external add parse
+    vars:
+      IMPORTS: 'import parse'
+
+  setup:workspace:
+    dir: "{{.TEST_DIR}}"
+    internal: true
+    cmds:
+      - uv init workspace --bare --no-workspace
+      - uv --directory workspace init a --package
+      - uv --directory workspace init b --package
+      - uv --directory workspace init c --package
+      - uv --directory workspace add --package a b
+      - uv --directory workspace add --package b c
+    vars:
+      UV_EXPORT: '--uv-export "--package a"'
+      IMPORTS: 'import c'
+
+  setup:group:
+    dir: "{{.TEST_DIR}}"
+    internal: true
+    cmds:
+      - uv init group --bare --no-workspace
+      - uv --directory group init a --package --no-workspace
+      - uv --directory group add ./a --group extra --no-workspace
+      - uv --directory group add parse --group extra
+    vars:
+      UV_EXPORT: '--uv-export "--group extra"'
+      IMPORTS: 'import parse; import a'
+
+  setup:extra:
+    dir: "{{.TEST_DIR}}"
+    internal: true
+    cmds:
+      - uv init extra --bare --no-workspace
+      - uv --directory extra init a --package --no-workspace
+      - uv --directory extra add ./a --optional extra --no-workspace
+      - uv --directory extra add parse --optional extra
+    vars:
+      UV_EXPORT: '--uv-export "--extra extra"'
+      IMPORTS: 'import parse; import a'
