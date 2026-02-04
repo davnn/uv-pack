@@ -1,17 +1,14 @@
 [project]
 name = "uv-pack"
-version = "0.1.0"
+version = "0.1.1"
 description = "Pack you uv environment for offline usage."
 readme = "README.md"
-homepage = "https://github.com/davnn/uv-pack"
-repository = "https://github.com/davnn/uv-pack"
 authors = [{ name = "David Muhr", email = "muhrdavid+github@gmail.com" }]
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: MIT License",
     "Topic :: Software Development :: Libraries",
-    "Topic :: Scientific/Engineering",
     "Topic :: Utilities",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
@@ -39,9 +36,14 @@ dev = [
     "black>=26.1.0",
     "notebook>=7.5.2",
     "pre-commit>=4.5.1",
-    "pyright>=1.1.408",
+    "pyright[nodejs]>=1.1.408",
     "ruff>=0.14.14",
 ]
+
+[project.urls]
+source = "https://github.com/davnn/uv-pack"
+tracker = "https://github.com/davnn/uv-pack/issues"
+"release notes" = "https://github.com/davnn/uv-pack/releases"
 
 [project.scripts]
 uv-pack = "uv_pack:main"

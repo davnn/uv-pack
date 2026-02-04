@@ -56,14 +56,10 @@ Options:
 - `--uv-export`: extra args passed to `uv export`
 - `--pip-download`: extra args passed to `pip download`
 
-Notes:
-- The CLI is structured into five pipeline steps, see description below.
-- Extra args are split on whitespace (for example: `--uv-export "--dev --all-extras"`).
-
 Pipeline steps:
 - `clean`: remove the output directory
 - `export`: write `requirements.txt` files for third-party and local packages
-- `download`: download third-party wheels
+- `download`: download third-party wheels and sources
 - `build`: build local wheels and compile the combined requirements file
 - `python`: download a python-build-standalone archive for the current Python version and platform
 
@@ -174,3 +170,9 @@ and the downloaded Python interpreter.
 #### How do I only re-build my package if my pack is already complete?
 
 Run only ``uv-pack build``.
+
+#### How can I use my pack?
+
+Move the pack to the final location and, depending on the shell used, call
+`unpack.sh`, `unpack.ps1`, or `unpack.cmd`. Don't move the virtual
+environment or pack folder after unpacking (hardcoded paths).

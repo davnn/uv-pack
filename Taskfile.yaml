@@ -40,7 +40,7 @@ tasks:
     test:
         desc: "Create a pack and unpack it using platform scripts."
         cmds:
-            - uv run --isolated --no-editable uv-pack
+            - uv run --isolated --no-editable --refresh uv-pack
             - task: unpack-posix
             - task: unpack-windows
 
