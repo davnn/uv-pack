@@ -10,6 +10,7 @@ def download_third_party_wheels(
     requirements_file: Path,
     wheels_directory: Path,
     other_args: str,
+    platform: str | None = None,
 ) -> None:
     wheels_directory.mkdir(parents=True, exist_ok=True)
 
@@ -30,6 +31,9 @@ def download_third_party_wheels(
         "-d",
         str(wheels_directory),
     ]
+    
+    if platform:
+        cmd.extend(["--platform", platform])
 
     cmd.extend(other_args.split())
     exit_on_error(run_cmd(cmd, "pip download"))

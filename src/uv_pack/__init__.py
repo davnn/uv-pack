@@ -134,6 +134,12 @@ def pack(
         "-o",
         help="Path to output directory",
     ),
+    platform: str | None = typer.Option(
+        None,
+        "--platform",
+        "-p",
+        help="Target platform (e.g., 'win_amd64', 'linux_aarch64'). If not specified, the current platform is used.",
+    ),
     uv_export: str = typer.Option(
         default="",
         help=_additional_cli_args("uv export"),
@@ -200,6 +206,7 @@ def pack(
                 requirements_file=pack.requirements_export_txt,
                 wheels_directory=pack.wheels_dir,
                 other_args=pip_download,
+                platform=platform,
             )
 
     if Step.build in selected_steps:
@@ -249,6 +256,7 @@ def pack(
         pack.python_dir.mkdir(exist_ok=True)
         python_path = download_latest_python_build(
             dest_dir=pack.python_dir,
+            platform=platform,
         )
         console_print(
             f"[green]✔ Python[/green] archive: '{python_path}'",
