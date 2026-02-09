@@ -34,6 +34,7 @@ LATEST_RELEASE_API = (
 def download_latest_python_build(
     *,
     dest_dir: Path,
+    platform: str | None = None,
     target_format: Literal[
         "install_only",
         "install_only_stripped",
@@ -44,9 +45,10 @@ def download_latest_python_build(
     Returns the downloaded file path.
     """
     session = session_with_retries()
+    target_arch = platform or resolve_platform()
     url = find_latest_python_build(
         python_version=f"{sys.version_info.major}.{sys.version_info.minor}",
-        target_arch=resolve_platform(),
+        target_arch=target_arch,
         target_format=target_format,
         session=session,
     )
