@@ -18,6 +18,7 @@ All scripts implement the same behavior and differ only in platform syntax.
 - `VENV_DIR` (optional)
   Target virtual environment directory.
   Default: `<PACK_DIR>/.venv`
+  Set to an empty string to install directly into `BASE_PY`.
 
 - `PY_DEST` (optional)
   Target python directory (only used if Python archive exists).
@@ -39,7 +40,7 @@ Expected layout relative to `PACK_DIR`:
 - `vendor/`          — Additional wheel or source distributions
 - `python/`          — *(optional)* Directory containing a single `*.tar.gz` Python distribution
 - `.python/`         — Extraction target for the bundled Python (created automatically)
-- `.venv/`           — Virtual environment directory (created automatically)
+- `.venv/`           — Virtual environment directory (created automatically unless `VENV_DIR` is empty)
 
 ---
 

@@ -6,7 +6,7 @@
    - `VENDOR_DIR = <PACK_DIR>/vendor`
    - `PY_SRC = <PACK_DIR>/python`
    - `PY_DEST = <PACK_DIR>/.python`
-   - `VENV_DIR` defaults to `<PACK_DIR>/.venv` if not set
+   - `VENV_DIR` defaults to `<PACK_DIR>/.venv` if not set, skip venv creation and install directly into `BASE_PY` if set to empty string
 
 2. **Discover bundled Python archive**
    - If `<PACK_DIR>/python` exists, search for `*.tar.gz`
@@ -32,12 +32,16 @@
    - Windows: interpreter must exist
 
 6. **Create virtual environment**
-   - Run: `<BASE_PY> -m venv <VENV_DIR>`
+   - If `VENV_DIR` is non-empty, run: `<BASE_PY> -m venv <VENV_DIR>`
+   - If `VENV_DIR` is empty, use `BASE_PY` directly for installation
 
 7. **Determine venv interpreter**
-   - POSIX: `<VENV_DIR>/bin/python` or `python3`
-   - Windows: `<VENV_DIR>\Scripts\python.exe`
-   - Fail if not found
+   - If `VENV_DIR` is non-empty:
+     - POSIX: `<VENV_DIR>/bin/python` or `python3`
+     - Windows: `<VENV_DIR>\Scripts\python.exe`
+     - Fail if not found
+   - If `VENV_DIR` is empty:
+     - Use `BASE_PY`
 
 8. **Offline installation**
    - Set:
@@ -50,4 +54,4 @@
      - `requirements.txt`
 
 9. **Completion**
-   - Print activation instructions appropriate for the platform
+   - Print activation instructions appropriate for the platform when a venv was created

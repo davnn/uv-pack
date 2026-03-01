@@ -113,7 +113,8 @@ Windows cmd:
 All scripts also accept `VENV_DIR`, `PY_DEST` and `BASE_PY` environment variables.
 Use `BASE_PY` when you skipped the `python` step during packing to provide a system
 python interpreter. `VENV_DIR` (default = `.venv`) and `PY_DEST` (default = `.python`)
-can be used to customize the target python and venv directory.
+can be used to customize the target python and venv directory. Set `VENV_DIR=""` to
+skip creating a virtual environment and install directly into `BASE_PY`.
 
 Configuration
 -------------
@@ -161,6 +162,14 @@ download (``pip download``), you can specify them as:
 #### How do I skip bundling Python?
 
 Skip the `python` step: ``uv-pack --skip python``. When unpacking, set `BASE_PY` to a system Python path.
+
+#### How do I install directly into a system Python instead of creating `.venv`?
+
+Set `BASE_PY` to the target interpreter and `VENV_DIR=""` when unpacking. For example:
+
+```sh
+BASE_PY=/usr/bin/python3 VENV_DIR="" sh ./pack/unpack.sh
+```
 
 #### How do I rerun without deleting the existing pack directory?
 
