@@ -38,68 +38,40 @@ tasks:
         cmd: uv run pyright --ignoreexternal --verifytypes uv_pack
 
     test:
-        desc: "Create a pack and unpack it using platform scripts. Set SYSTEM_PYTHON=true to test with VENV_DIR empty using a disposable base venv."
-        vars:
-            SYSTEM_PYTHON: '{{.SYSTEM_PYTHON | default "false"}}'
+        desc: "Create a pack and unpack it using platform scripts."
         cmds:
-            - 'uv run --isolated --no-editable --refresh uv-pack{{if eq .SYSTEM_PYTHON "true"}} --skip python{{end}}'
+            - uv run --isolated --no-editable --refresh uv-pack
             - task: unpack-posix
-              vars:
-                SYSTEM_PYTHON: "{{.SYSTEM_PYTHON}}"
             - task: unpack-windows
-              vars:
-                SYSTEM_PYTHON: "{{.SYSTEM_PYTHON}}"
 
     unpack-posix:
         desc: "Create a pack and unpack it using the POSIX script."
         platforms: [linux, darwin]
-        vars:
-            SYSTEM_PYTHON: '{{.SYSTEM_PYTHON | default "false"}}'
-            BASE_TEST_DIR: ./pack/.base-test
-            BASE_PY: '{{.BASE_TEST_DIR}}/bin/python'
         cmds:
-            - '{{if eq .SYSTEM_PYTHON "true"}}sh -c ''uv venv --clear {{.BASE_TEST_DIR}}; BASE_PY={{.BASE_PY}}; export BASE_PY; VENV_DIR="" sh ./pack/unpack.sh''{{else}}sh ./pack/unpack.sh{{end}}'
-            - '{{if eq .SYSTEM_PYTHON "true"}}{{.BASE_PY}}{{else}}./pack/.venv/bin/python{{end}} -c "import typer;"'
+            - sh ./pack/unpack.sh
+            - ./pack/.venv/bin/python -c "import typer;"
 
     unpack-windows:
         desc: "Create a pack and unpack it using PowerShell and CMD."
         platforms: [windows]
-        vars:
-            SYSTEM_PYTHON: '{{.SYSTEM_PYTHON | default "false"}}'
         cmds:
             - task: unpack-windows-ps1
-              vars:
-                SYSTEM_PYTHON: "{{.SYSTEM_PYTHON}}"
-            - '{{if ne .SYSTEM_PYTHON "true"}}powershell -NoProfile -Command "Remove-Item -Path ''.\pack\.venv'',''.\pack\.python'' -Recurse -Force"{{end}}'
+            - powershell -NoProfile -Command "Remove-Item -Path '.\pack\.venv\','.\pack\.python' -Recurse -Force"
             - task: unpack-windows-cmd
-              vars:
-                SYSTEM_PYTHON: "{{.SYSTEM_PYTHON}}"
 
     unpack-windows-ps1:
         desc: "Create a pack and unpack it using PowerShell."
         platforms: [windows]
-        vars:
-            SYSTEM_PYTHON: '{{.SYSTEM_PYTHON | default "false"}}'
-            BASE_TEST_DIR: .\pack\.base-test
-            BASE_PY: '{{.BASE_TEST_DIR}}\Scripts\python.exe'
-            VENV_PY: .\pack\.venv\Scripts\python.exe
         cmds:
-            - >-
-              powershell -NoProfile {{if eq .SYSTEM_PYTHON "true"}} -Command "uv venv --clear {{.BASE_TEST_DIR}} | Out-Null; $env:BASE_PY = '{{.BASE_PY}}'; $env:VENV_DIR = ''; & '.\\pack\\unpack.ps1'; & $env:BASE_PY -c 'import typer;'"{{else}} -ExecutionPolicy Bypass -File .\\pack\\unpack.ps1{{end}}
-            - >-
-              powershell -NoProfile -Command "& {{if eq .SYSTEM_PYTHON "true"}}{{.BASE_PY}}{{else}}{{.VENV_PY}}{{end}} -c 'import typer;'"
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\\pack\\unpack.ps1
+            - powershell -NoProfile -Command "& '.\pack\.venv\Scripts\python.exe' -c 'import typer;'"
 
     unpack-windows-cmd:
         desc: "Create a pack and unpack it using CMD."
         platforms: [windows]
-        vars:
-            SYSTEM_PYTHON: '{{.SYSTEM_PYTHON | default "false"}}'
-            BASE_TEST_DIR: .\pack\.base-test
-            BASE_PY: '{{.BASE_TEST_DIR}}\Scripts\python.exe'
-            VENV_PY: .\\pack\\.venv\\Scripts\\python.exe
         cmds:
-            - '{{if eq .SYSTEM_PYTHON "true"}}cmd /v:on /c "uv venv --clear {{.BASE_TEST_DIR}} & set \"BASE_PY={{.BASE_PY}}\" & set \"VENV_DIR=\" & .\\pack\\unpack.cmd & \"!BASE_PY!\" -c \"import typer;\""{{else}}cmd /c .\\pack\\unpack.cmd{{end}}'
-            - 'cmd /c {{if eq .SYSTEM_PYTHON "true"}}{{.BASE_PY}}{{else}}{{.VENV_PY}}{{end}} -c "import typer;"'
+            - cmd /c .\\pack\\unpack.cmd
+            - cmd /c .\\pack\\.venv\\Scripts\\python.exe -c "import typer;"
 
     check:
         desc: "Run a linting, type checking, and tests."
@@ -107,9 +79,6 @@ tasks:
             - task: lint
             - task: typing
             - task: test
-            - task: test
-              vars:
-                SYSTEM_PYTHON: true
 
     setup:
         desc: "Setup the uv environment"
