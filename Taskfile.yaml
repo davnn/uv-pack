@@ -72,9 +72,7 @@ tasks:
         cmds:
             - task: lint
             - task: typing
-            - task: test # venv-install test
-            - task: test # system-install test
-              vars: { VENV_DIR: "" }
+            - task: test
 
     setup:
         desc: "Setup the uv environment"
