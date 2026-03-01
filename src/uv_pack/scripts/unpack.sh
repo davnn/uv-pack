@@ -51,7 +51,6 @@ fi
 say "Using base interpreter: $BASE_PY"
 if [ -n "$VENV_DIR" ]; then
   "$BASE_PY" -m venv "$VENV_DIR"
-
   VENV_PY="$VENV_DIR/bin/python"
   [ -x "$VENV_PY" ] || VENV_PY="$VENV_DIR/bin/python3"
   [ -x "$VENV_PY" ] || die "Venv python missing"

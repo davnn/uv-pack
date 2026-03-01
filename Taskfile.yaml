@@ -2,6 +2,7 @@ version: "3"
 
 vars:
     SOURCES: src
+    VENV_DIR: '{{.VENV_DIR | default "./pack/.venv"}}'
 
 includes:
     tests: ./tests/Taskfile.yaml
@@ -47,9 +48,13 @@ tasks:
     unpack-posix:
         desc: "Create a pack and unpack it using the POSIX script."
         platforms: [linux, darwin]
+        env:
+            VENV_DIR: '{{.VENV_DIR}}'
+        vars:
+            PYTHON: '{{if eq .VENV_DIR ""}}./pack/.python/python/bin/python{{else}}./pack/.venv/bin/python{{end}}'
         cmds:
             - sh ./pack/unpack.sh
-            - ./pack/.venv/bin/python -c "import typer;"
+            - '{{.PYTHON}} -c "import typer;"'
 
     unpack-windows:
         desc: "Create a pack and unpack it using PowerShell and CMD."
@@ -62,23 +67,33 @@ tasks:
     unpack-windows-ps1:
         desc: "Create a pack and unpack it using PowerShell."
         platforms: [windows]
+        env:
+            VENV_DIR: '{{.VENV_DIR}}'
+        vars:
+            PYTHON: '{{if eq .VENV_DIR ""}}.\pack\.python\python\python.exe{{else}}.\pack\.venv\Scripts\python.exe{{end}}'
         cmds:
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\\pack\\unpack.ps1
-            - powershell -NoProfile -Command "& '.\pack\.venv\Scripts\python.exe' -c 'import typer;'"
+            - powershell -NoProfile -ExecutionPolicy Bypass -File .\pack\unpack.ps1
+            - powershell -NoProfile -Command "& '{{.PYTHON}}' -c 'import typer;'"
 
     unpack-windows-cmd:
         desc: "Create a pack and unpack it using CMD."
         platforms: [windows]
+        env:
+            VENV_DIR: '{{.VENV_DIR}}'
+        vars:
+            PYTHON: '{{if eq .VENV_DIR ""}}.\pack\.python\python\python.exe{{else}}.\pack\.venv\Scripts\python.exe{{end}}'
         cmds:
-            - cmd /c .\\pack\\unpack.cmd
-            - cmd /c .\\pack\\.venv\\Scripts\\python.exe -c "import typer;"
+            - cmd /c .\pack\unpack.cmd
+            - cmd /c {{.PYTHON}} -c "import typer;"
 
     check:
         desc: "Run a linting, type checking, and tests."
         cmds:
             - task: lint
             - task: typing
-            - task: test
+            - task: test # venv-install test
+            - task: test # system-install test
+              vars: { VENV_DIR: "" }
 
     setup:
         desc: "Setup the uv environment"
