@@ -17,7 +17,6 @@ pack/
 ├── python/              # python interpreter
 ├── unpack.sh
 ├── unpack.ps1
-├── unpack.bat
 ├── .gitignore
 └── README.md
 """

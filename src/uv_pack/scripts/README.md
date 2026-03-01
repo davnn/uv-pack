@@ -7,9 +7,8 @@ The scripts are:
 
 - `unpack.sh`   (POSIX shells)
 - `unpack.ps1`  (PowerShell)
-- `unpack.cmd`  (Windows CMD)
 
-All scripts implement the same behavior and differ only in platform syntax.
+Both scripts implement the same behavior and differ only in platform syntax.
 
 ---
 

@@ -14,7 +14,7 @@ What it does
 - Downloads third-party wheels into `pack/wheels/`.
 - Builds local workspace packages into `pack/vendor/`.
 - Downloads a python-build-standalone archive into `pack/python/` (unless you skip the `python` step).
-- Writes `unpack.sh`, `unpack.ps1`, and `unpack.cmd` to unpack the resulting venv offline.
+- Writes `unpack.sh` and `unpack.ps1` to unpack the resulting venv offline.
 
 Install
 -------
@@ -84,7 +84,6 @@ pack/
   python/   # (omitted when the python step is skipped)
   unpack.sh
   unpack.ps1
-  unpack.cmd
   .gitignore
   README.md
 ```
@@ -102,12 +101,6 @@ PowerShell:
 
 ```powershell
 .\pack\unpack.ps1
-```
-
-Windows cmd:
-
-```cmd
-.\pack\unpack.cmd
 ```
 
 All scripts also accept `VENV_DIR`, `PY_DEST` and `BASE_PY` environment variables.
@@ -183,5 +176,5 @@ Run only ``uv-pack build``.
 #### How can I use my pack?
 
 Move the pack to the final location and, depending on the shell used, call
-`unpack.sh`, `unpack.ps1`, or `unpack.cmd`. Don't move the virtual
+`unpack.sh` or `unpack.ps1`. Don't move the virtual
 environment or pack folder after unpacking (hardcoded paths).
