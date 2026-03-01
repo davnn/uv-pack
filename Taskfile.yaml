@@ -72,7 +72,7 @@ tasks:
         vars:
             PYTHON: '{{if eq .VENV_DIR ""}}.\pack\.python\python\python.exe{{else}}.\pack\.venv\Scripts\python.exe{{end}}'
         cmds:
-            - powershell -NoProfile -ExecutionPolicy Bypass -File .\pack\unpack.ps1
+            - powershell -NoProfile -ExecutionPolicy Bypass -File '.\pack\unpack.ps1'
             - powershell -NoProfile -Command "& '{{.PYTHON}}' -c 'import typer;'"
 
     unpack-windows-cmd:
@@ -83,7 +83,7 @@ tasks:
         vars:
             PYTHON: '{{if eq .VENV_DIR ""}}.\pack\.python\python\python.exe{{else}}.\pack\.venv\Scripts\python.exe{{end}}'
         cmds:
-            - cmd /c .\pack\unpack.cmd
+            - cmd /c '.\pack\unpack.cmd'
             - cmd /c {{.PYTHON}} -c "import typer;"
 
     check:
