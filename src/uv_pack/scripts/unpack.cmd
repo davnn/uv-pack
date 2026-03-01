@@ -5,9 +5,12 @@ set "PACK_DIR=%~dp0"
 set "REQ_FILE=%PACK_DIR%requirements.txt"
 set "WHEELS_DIR=%PACK_DIR%wheels"
 set "VENDOR_DIR=%PACK_DIR%vendor"
-if "%VENV_DIR%"=="" set "VENV_DIR=%PACK_DIR%.venv"
 if "%PY_DEST%"=="" set "PY_DEST=%PACK_DIR%.python"
 set "PY_SRC=%PACK_DIR%python"
+
+set "HAS_VENV_DIR=0"
+if defined VENV_DIR set "HAS_VENV_DIR=1"
+if "%HAS_VENV_DIR%"=="0" set "VENV_DIR=%PACK_DIR%.venv"
 
 set "ARCHIVE="
 if exist "%PY_SRC%" (
@@ -64,12 +67,16 @@ if not exist "%BASE_PY%" (
 )
 
 echo Using base interpreter: %BASE_PY%
-"%BASE_PY%" -m venv "%VENV_DIR%"
+if not "%VENV_DIR%"=="" (
+  "%BASE_PY%" -m venv "%VENV_DIR%"
 
-set "VENV_PY=%VENV_DIR%\Scripts\python.exe"
-if not exist "%VENV_PY%" (
-  echo ERROR: Venv python missing
-  exit /b 1
+  set "VENV_PY=%VENV_DIR%\Scripts\python.exe"
+  if not exist "%VENV_PY%" (
+    echo ERROR: Venv python missing
+    exit /b 1
+  )
+) else (
+  set "VENV_PY=%BASE_PY%"
 )
 
 set "PIP_NO_INDEX=1"
@@ -83,6 +90,8 @@ set "PIP_DISABLE_PIP_VERSION_CHECK=1"
   -r "%REQ_FILE%"
 
 echo Done.
-echo Activate with:
-echo   %VENV_DIR%\Scripts\activate.bat
+if not "%VENV_DIR%"=="" (
+  echo Activate with:
+  echo   %VENV_DIR%\Scripts\activate.bat
+)
 endlocal

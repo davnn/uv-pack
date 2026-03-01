@@ -6,7 +6,7 @@ PACK_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 REQ_FILE="$PACK_DIR/requirements.txt"
 WHEELS_DIR="$PACK_DIR/wheels"
 VENDOR_DIR="$PACK_DIR/vendor"
-VENV_DIR="${VENV_DIR:-"$PACK_DIR/.venv"}"
+VENV_DIR="${VENV_DIR-"$PACK_DIR/.venv"}"
 PY_DEST="${PY_DEST:-"$PACK_DIR/.python"}"
 PY_SRC="$PACK_DIR/python"
 
@@ -49,11 +49,15 @@ fi
 [ -x "$BASE_PY" ] || die "BASE_PY not executable: $BASE_PY"
 
 say "Using base interpreter: $BASE_PY"
-"$BASE_PY" -m venv "$VENV_DIR"
+if [ -n "$VENV_DIR" ]; then
+  "$BASE_PY" -m venv "$VENV_DIR"
 
-VENV_PY="$VENV_DIR/bin/python"
-[ -x "$VENV_PY" ] || VENV_PY="$VENV_DIR/bin/python3"
-[ -x "$VENV_PY" ] || die "Venv python missing"
+  VENV_PY="$VENV_DIR/bin/python"
+  [ -x "$VENV_PY" ] || VENV_PY="$VENV_DIR/bin/python3"
+  [ -x "$VENV_PY" ] || die "Venv python missing"
+else
+  VENV_PY="$BASE_PY"
+fi
 
 export PIP_NO_INDEX=1
 export PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -66,5 +70,7 @@ export PIP_DISABLE_PIP_VERSION_CHECK=1
   -r "$REQ_FILE"
 
 say "Done."
-say "Activate with:"
-say "  . \"$VENV_DIR/bin/activate\""
+if [ -n "$VENV_DIR" ]; then
+  say "Activate with:"
+  say "  . \"$VENV_DIR/bin/activate\""
+fi

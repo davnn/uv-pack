@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [string]$VenvDir = $env:VENV_DIR,
+  [AllowEmptyString()][string]$VenvDir = $env:VENV_DIR,
   [string]$BasePy  = $env:BASE_PY,
   [string]$PyDest  = $env:PY_DEST
 )
@@ -8,7 +8,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 $PackDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-if (-not $VenvDir) { $VenvDir = Join-Path $PackDir ".venv" }
+$HasVenvDir = $PSBoundParameters.ContainsKey("VenvDir") -or $null -ne $env:VENV_DIR
+if (-not $HasVenvDir) { $VenvDir = Join-Path $PackDir ".venv" }
 if (-not $PyDest) { $PyDest = Join-Path $PackDir ".python" }
 
 $ReqFile   = Join-Path $PackDir "requirements.txt"
@@ -60,11 +61,15 @@ if (-not (Test-Path $BasePy)) {
 }
 
 Write-Host "Using base interpreter: $BasePy"
-& $BasePy -m venv $VenvDir
+if ($VenvDir) {
+  & $BasePy -m venv $VenvDir
 
-$VenvPython = Join-Path $VenvDir "Scripts\python.exe"
-if (-not (Test-Path $VenvPython)) {
-  throw "Venv python missing"
+  $VenvPython = Join-Path $VenvDir "Scripts\python.exe"
+  if (-not (Test-Path $VenvPython)) {
+    throw "Venv python missing"
+  }
+} else {
+  $VenvPython = $BasePy
 }
 
 $env:PIP_NO_INDEX = "1"
@@ -80,5 +85,7 @@ try {
   -r $ReqFile
 
 Write-Host "Done."
-Write-Host "Activate with:"
-Write-Host "  $(Join-Path $VenvDir 'Scripts\Activate.ps1')"
+if ($VenvDir) {
+  Write-Host "Activate with:"
+  Write-Host "  $(Join-Path $VenvDir 'Scripts\Activate.ps1')"
+}
