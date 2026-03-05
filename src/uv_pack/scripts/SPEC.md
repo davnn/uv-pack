@@ -7,7 +7,7 @@
    - `PY_SRC = <PACK_DIR>/python`
    - `PY_DEST = <PACK_DIR>/.python`
    - `VENV_DIR = <PACK_DIR>/.venv`
-   
+
 If `VENV_DIR=""`, the depenencies are installed directly into `BASE_PY`.
 
 2. **Discover bundled Python archive**
