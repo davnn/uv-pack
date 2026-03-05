@@ -1,12 +1,15 @@
 version: "3"
 
 vars:
-  TEST_DIR: tests
+  TEST_DIR: "tests"
+
+env:
+  PYTHONIOENCODING: "utf-8"
+  PYTHONUTF8: "1"
 
 tasks:
   test:
     desc: Run all packaging tests in parallel
-    platforms: [linux]
     deps:
       - test:self
       - test:editable
@@ -19,26 +22,38 @@ tasks:
 
   test:*:
     desc: Generic test setup
-    platforms: [linux]
     dir: "{{.TEST_DIR}}"
     vars:
       FOLDER: "{{index .MATCH 0}}"
+      CLEAN_PS: >
+        powershell -NoProfile -Command 'if (Test-Path "{{.FOLDER}}") { Remove-Item -Recurse -Force "{{.FOLDER}}"}'
+      CLEAN_SH: >
+        rm -rf {{.FOLDER}}
     cmds:
-      - rm -rf {{.FOLDER}}
+      - '{{if eq OS "windows"}}{{.CLEAN_PS}}{{else}}{{.CLEAN_SH}}{{end}}'
       - task: setup:{{.FOLDER}}
         vars:
           FOLDER: "{{.FOLDER}}"
 
   pack:*:
     desc: Generic pack and unpack
-    platforms: [linux]
     dir: "{{.TEST_DIR}}"
     vars:
       FOLDER: "{{index .MATCH 0}}"
+      IMPORTS_CMD: '{{.IMPORTS | default ""}}'
+      UNPACK_PS: >
+        powershell -NoProfile -ExecutionPolicy Bypass -Command
+        '$env:BASE_PY = (uv --directory {{.FOLDER}} python find); & .\{{.FOLDER}}\pack\unpack.ps1'
+      UNPACK_SH: >
+        BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
+      VERIFY_PS: >
+        powershell -NoProfile -Command ''& ".\{{.FOLDER}}\pack\.venv\Scripts\python.exe" -c "{{.IMPORTS_CMD}}"
+      VERIFY_SH: >
+        {{.FOLDER}}/pack/.venv/bin/python -c "{{.IMPORTS_CMD}}"
     cmds:
       - uv --directory {{.FOLDER}} run --with ../.. uv-pack --skip python {{.ARGS | default ""}}
-      - BASE_PY="$(uv --directory {{.FOLDER}} python find)" sh {{.FOLDER}}/pack/unpack.sh
-      - '{{.FOLDER}}/pack/.venv/bin/python -c "{{.IMPORTS | default ""}}"'
+      - '{{if eq OS "windows"}}{{.UNPACK_PS}}{{else}}{{.UNPACK_SH}}{{end}}'
+      - '{{if eq OS "windows"}}{{.VERIFY_PS}}{{else}}{{.VERIFY_SH}}{{end}}'
 
   # ---- Test definitions ----
 
