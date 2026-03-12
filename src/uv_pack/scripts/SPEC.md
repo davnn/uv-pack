@@ -4,15 +4,17 @@
    - `REQ_FILE = <PACK_DIR>/requirements.txt`
    - `WHEELS_DIR = <PACK_DIR>/wheels`
    - `VENDOR_DIR = <PACK_DIR>/vendor`
-   - `PY_SRC = <PACK_DIR>/python`
-   - `PY_DEST = <PACK_DIR>/.python`
+   - `ARCHIVE_DIR = <PACK_DIR>/python`
+   - `PYTHON_DIR = <PACK_DIR>/.python`
    - `VENV_DIR = <PACK_DIR>/.venv`
 
 If `VENV_DIR=""`, the depenencies are installed directly into `BASE_PY`.
+If `BASE_PY` is set, it should be preferred over an existing `PYTHON_DIR`, which should be preferred over unpacking
+a python interpreter from `ARCHIVE_DIR` to `PYTHON_DIR`.
 
 2. **Discover bundled Python archive**
    - If `<PACK_DIR>/python` exists, search for `*.tar.gz`
-   - Exactly one archive is expected
+   - Choose the first found archive inside the directory
    - If no archive is present, bundled Python is considered unavailable
 
 3. **Extract bundled Python (if needed)**
@@ -22,10 +24,8 @@ If `VENV_DIR=""`, the depenencies are installed directly into `BASE_PY`.
 
 4. **Interpreter discovery**
    - Search recursively under `.python`
-   - POSIX: `python` or `python3` with executable bit set
-   - Windows: `python.exe`
-   - The match with the shortest path is selected
-   - If found, this interpreter overrides `BASE_PY`
+   - POSIX: `python` or `python3` with executable bit set (alphabetically first)
+   - Windows: `python.exe` (match with the shortest path is selected)
 
 5. **Interpreter validation**
    - POSIX: interpreter must exist and be executable

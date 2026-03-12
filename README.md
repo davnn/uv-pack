@@ -103,9 +103,9 @@ PowerShell:
 .\pack\unpack.ps1
 ```
 
-All scripts also accept `VENV_DIR`, `PY_DEST` and `BASE_PY` environment variables.
+All scripts also accept `VENV_DIR`, `PYTHON_DIR` and `BASE_PY` environment variables.
 Use `BASE_PY` when you skipped the `python` step during packing to provide a system
-python interpreter. `VENV_DIR` (default = `.venv`) and `PY_DEST` (default = `.python`)
+python interpreter. `VENV_DIR` (default = `.venv`) and `PYTHON_DIR` (default = `.python`)
 can be used to customize the target python and venv directory. Set `VENV_DIR=""` to
 skip creating a virtual environment and install directly into `BASE_PY`.
 
