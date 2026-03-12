@@ -17,10 +17,12 @@ $WheelsDir = Join-Path $PackDir "wheels"
 $VendorDir = Join-Path $PackDir "vendor"
 $PySrc     = Join-Path $PackDir "python"
 
-function Find-Python([string]$Root) {
-  Get-ChildItem -Path $Root -Recurse -File -Filter python.exe -ErrorAction SilentlyContinue |
-    Sort-Object { $_.FullName.Length } |
-    Select-Object -First 1 -ExpandProperty FullName
+function Find-Python($Root) {
+  Get-ChildItem -Path $Root -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -eq "python.exe" } |
+    Select-Object -ExpandProperty FullName |
+    Sort-Object { $_.Length } |
+    Select-Object -First 1
 }
 
 $Archive = if (Test-Path $PySrc) {
