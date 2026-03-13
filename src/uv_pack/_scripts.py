@@ -21,7 +21,6 @@ def copy_unpack_scripts(
     output_directory.mkdir(parents=True, exist_ok=True)
     copy_file(scripts_dir / "unpack.sh", force_lf=True)
     copy_file(scripts_dir / "unpack.ps1")
-    copy_file(scripts_dir / "unpack.cmd")
     copy_file(scripts_dir / "README.md")
     _make_executable(output_directory / "unpack.sh")
 

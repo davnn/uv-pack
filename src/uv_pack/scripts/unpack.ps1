@@ -1,14 +1,15 @@
 [CmdletBinding()]
 param(
-  [string]$VenvDir = $env:VENV_DIR,
+  [AllowEmptyString()][string]$VenvDir = $env:VENV_DIR,
   [string]$BasePy  = $env:BASE_PY,
-  [string]$PyDest  = $env:PY_DEST
+  [string]$PyDest  = $env:PYTHON_DIR
 )
 
 $ErrorActionPreference = "Stop"
 
 $PackDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-if (-not $VenvDir) { $VenvDir = Join-Path $PackDir ".venv" }
+$HasVenvDir = $PSBoundParameters.ContainsKey("VenvDir") -or $null -ne $env:VENV_DIR
+if (-not $HasVenvDir) { $VenvDir = Join-Path $PackDir ".venv" }
 if (-not $PyDest) { $PyDest = Join-Path $PackDir ".python" }
 
 $ReqFile   = Join-Path $PackDir "requirements.txt"
@@ -24,47 +25,34 @@ function Find-Python($Root) {
     Select-Object -First 1
 }
 
-function Find-Archive {
-  if (-not (Test-Path $PySrc)) { return $null }
-  Get-ChildItem -Path $PySrc -Filter *.tar.gz -File |
-    Sort-Object Name |
-    Select-Object -First 1 |
-    Select-Object -ExpandProperty FullName
+$Archive = if (Test-Path $PySrc) {
+  Get-ChildItem -Path $PySrc -File -Filter *.tar.gz | Sort-Object Name | Select-Object -First 1 -ExpandProperty FullName
 }
 
-$Archive = Find-Archive
-$HasArchive = [bool]$Archive
-
-if ($HasArchive) {
+if (-not $BasePy -and ((Test-Path $PyDest) -or $Archive)) {
   New-Item -ItemType Directory -Force -Path $PyDest | Out-Null
-  $found = Find-Python $PyDest
-
-  if (-not $found) {
+  $BasePy = Find-Python $PyDest
+  if (-not $BasePy -and $Archive) {
     tar -C $PyDest -xzf $Archive
     Write-Host "Extracted python to $PyDest"
-    $found = Find-Python $PyDest
+    $BasePy = Find-Python $PyDest
   }
-
-  if ($found) { $BasePy = $found }
 }
 
 if (-not $BasePy) {
-  if (-not $HasArchive) {
-    throw "BASE_PY must be set when no python archive is provided"
-  }
-  throw "Bundled python not found after extracting archive"
+  throw $(
+    if ($Archive) { "Bundled python not found after extracting archive" }
+    else { "BASE_PY must be set when no python archive is provided" }
+  )
 }
-
-if (-not (Test-Path $BasePy)) {
-  throw "BASE_PY not found: $BasePy"
-}
+if (-not (Test-Path $BasePy)) { throw "BASE_PY not found: $BasePy" }
 
 Write-Host "Using base interpreter: $BasePy"
-& $BasePy -m venv $VenvDir
-
-$VenvPython = Join-Path $VenvDir "Scripts\python.exe"
-if (-not (Test-Path $VenvPython)) {
-  throw "Venv python missing"
+$VenvPython = $BasePy
+if ($VenvDir) {
+  & $BasePy -m venv $VenvDir
+  $VenvPython = Join-Path $VenvDir "Scripts\python.exe"
+  if (-not (Test-Path $VenvPython)) { throw "Venv python missing" }
 }
 
 $env:PIP_NO_INDEX = "1"
@@ -80,5 +68,4 @@ try {
   -r $ReqFile
 
 Write-Host "Done."
-Write-Host "Activate with:"
-Write-Host "  $(Join-Path $VenvDir 'Scripts\Activate.ps1')"
+if ($VenvDir) { Write-Host "Activate with:"; Write-Host "  $(Join-Path $VenvDir 'Scripts\Activate.ps1')" }

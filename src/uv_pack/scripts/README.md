@@ -7,9 +7,8 @@ The scripts are:
 
 - `unpack.sh`   (POSIX shells)
 - `unpack.ps1`  (PowerShell)
-- `unpack.cmd`  (Windows CMD)
 
-All scripts implement the same behavior and differ only in platform syntax.
+Both scripts implement the same behavior and differ only in platform syntax.
 
 ---
 
@@ -18,15 +17,16 @@ All scripts implement the same behavior and differ only in platform syntax.
 - `VENV_DIR` (optional)
   Target virtual environment directory.
   Default: `<PACK_DIR>/.venv`
+  Set to an empty string to install directly into `BASE_PY`.
 
-- `PY_DEST` (optional)
+- `PYTHON_DIR` (optional)
   Target python directory (only used if Python archive exists).
   Default: `<PACK_DIR>/.python`
 
 - `BASE_PY` (optional)
   Explicit path to a Python interpreter to use as the venv base.
-  Required **only if** no bundled Python archive is found,
-  otherwise the archive is used.
+  Required **only if** no bundled Python archive is found, otherwise
+  overrides a found (unpacked) archive.
 
 ---
 
@@ -39,7 +39,7 @@ Expected layout relative to `PACK_DIR`:
 - `vendor/`          — Additional wheel or source distributions
 - `python/`          — *(optional)* Directory containing a single `*.tar.gz` Python distribution
 - `.python/`         — Extraction target for the bundled Python (created automatically)
-- `.venv/`           — Virtual environment directory (created automatically)
+- `.venv/`           — Virtual environment directory (created automatically unless `VENV_DIR` is empty)
 
 ---
 

@@ -14,7 +14,7 @@ What it does
 - Downloads third-party wheels into `pack/wheels/`.
 - Builds local workspace packages into `pack/vendor/`.
 - Downloads a python-build-standalone archive into `pack/python/` (unless you skip the `python` step).
-- Writes `unpack.sh`, `unpack.ps1`, and `unpack.cmd` to unpack the resulting venv offline.
+- Writes `unpack.sh` and `unpack.ps1` to unpack the resulting venv offline.
 
 Install
 -------
@@ -84,7 +84,6 @@ pack/
   python/   # (omitted when the python step is skipped)
   unpack.sh
   unpack.ps1
-  unpack.cmd
   .gitignore
   README.md
 ```
@@ -104,16 +103,11 @@ PowerShell:
 .\pack\unpack.ps1
 ```
 
-Windows cmd:
-
-```cmd
-.\pack\unpack.cmd
-```
-
-All scripts also accept `VENV_DIR`, `PY_DEST` and `BASE_PY` environment variables.
+All scripts also accept `VENV_DIR`, `PYTHON_DIR` and `BASE_PY` environment variables.
 Use `BASE_PY` when you skipped the `python` step during packing to provide a system
-python interpreter. `VENV_DIR` (default = `.venv`) and `PY_DEST` (default = `.python`)
-can be used to customize the target python and venv directory.
+python interpreter. `VENV_DIR` (default = `.venv`) and `PYTHON_DIR` (default = `.python`)
+can be used to customize the target python and venv directory. Set `VENV_DIR=""` to
+skip creating a virtual environment and install directly into `BASE_PY`.
 
 Configuration
 -------------
@@ -162,6 +156,14 @@ download (``pip download``), you can specify them as:
 
 Skip the `python` step: ``uv-pack --skip python``. When unpacking, set `BASE_PY` to a system Python path.
 
+#### How do I install directly into a system Python instead of creating `.venv`?
+
+Set `BASE_PY` to the target interpreter and `VENV_DIR=""` when unpacking. For example:
+
+```sh
+BASE_PY=/usr/bin/python3 VENV_DIR="" sh ./pack/unpack.sh
+```
+
 #### How do I rerun without deleting the existing pack directory?
 
 Skip the `clean` step: ``uv-pack --skip clean``. Note that this automatically re-uses downloaded wheels
@@ -174,5 +176,5 @@ Run only ``uv-pack build``.
 #### How can I use my pack?
 
 Move the pack to the final location and, depending on the shell used, call
-`unpack.sh`, `unpack.ps1`, or `unpack.cmd`. Don't move the virtual
+`unpack.sh` or `unpack.ps1`. Don't move the virtual
 environment or pack folder after unpacking (hardcoded paths).
