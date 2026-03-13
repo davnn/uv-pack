@@ -52,9 +52,9 @@ Options:
 - `-s, --skip`: skip a pipeline step (can be supplied multiple times)
 - `-o, --output-directory`: path to output directory (default: `./pack`)
 - `-v, --verbose`: show more detailed pack progress logging
-- `--uv-build`: extra args passed to `uv build`
-- `--uv-export`: extra args passed to `uv export`
-- `--pip-download`: extra args passed to `pip download`
+- `--uv-build`: extra argument passed to `uv build` (repeat to pass multiple arguments)
+- `--uv-export`: extra argument passed to `uv export` (repeat to pass multiple arguments)
+- `--pip-download`: extra argument passed to `pip download` (repeat to pass multiple arguments)
 
 Pipeline steps:
 - `clean`: remove the output directory
@@ -71,6 +71,23 @@ uv-pack --verbose
 # only clean and export the requirements
 uv-pack clean export
 ```
+
+Extra arguments
+---------------
+
+Use repeated `--uv-export`, `--pip-download`, and `--uv-build` options to pass
+additional arguments to `uv export`, `pip download`, and `uv build`.
+
+```bash
+uv-pack \
+  --uv-export=--package=my-package \
+  --uv-export=--locked \
+  --pip-download=--index-url=https://example.com/simple \
+  --uv-build=--no-build-isolation
+```
+
+The quoted form is also valid, for example `--uv-export "--locked"`, but the
+examples in this README use the  `--option=value` form.
 
 Output layout
 -------------
@@ -135,22 +152,12 @@ Limitations
 FAQ
 -----------
 
-#### How do I pass extra options to `uv export` or another command?
-
-Use `--uv-export` to forward arguments, for example:
-
-- ``uv-pack --uv-export "--package $MY_PACKAGE"`` to export only a specific workspace package
-- ``uv-pack --uv-export "--locked  --dev"`` to include dev-deps and ensure an up-to-date lock file
-- ``uv-pack --uv-export "--all-extras"`` to include all extra dependencies
-
-The same is true for ``--uv-build`` and ``--pip-download`` arguments.
-
 #### How do I specify index-urls and extra-index-urls?
 
 The index urls set in ``pyproject.toml`` and ``uv.toml`` are not configured by default for the wheel
 download (``pip download``), you can specify them as:
 
-- ``uv-pack --pip-download "--index-url $MY_INDEX --extra-index-url $MY_EXTRA_INDEX"``
+- ``uv-pack --pip-download=--index-url=$MY_INDEX --pip-download=--extra-index-url=$MY_EXTRA_INDEX``
 
 #### How do I skip bundling Python?
 

@@ -99,7 +99,7 @@ tasks:
       - uv --directory {{.FOLDER}} add --package b c
       - task: "pack:{{.FOLDER}}"
         vars:
-          ARGS: '--uv-export "--package a"'
+          ARGS: '--uv-export=--package=a'
           IMPORTS: "import c"
 
   setup:group:
@@ -112,7 +112,7 @@ tasks:
       - uv --directory {{.FOLDER}} add parse --group extra
       - task: "pack:{{.FOLDER}}"
         vars:
-          ARGS: '--uv-export "--group extra"'
+          ARGS: '--uv-export=--group=extra'
           IMPORTS: "import parse; import a"
 
   setup:extra:
@@ -125,5 +125,5 @@ tasks:
       - uv --directory {{.FOLDER}} add parse --optional extra
       - task: "pack:{{.FOLDER}}"
         vars:
-          ARGS: '--uv-export "--extra extra"'
+          ARGS: '--uv-export=--extra=extra'
           IMPORTS: "import parse; import a"
