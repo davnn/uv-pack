@@ -9,7 +9,7 @@ def download_third_party_wheels(
     *,
     requirements_file: Path,
     wheels_directory: Path,
-    other_args: str,
+    other_args: list[str],
 ) -> None:
     wheels_directory.mkdir(parents=True, exist_ok=True)
 
@@ -31,7 +31,7 @@ def download_third_party_wheels(
         str(wheels_directory),
     ]
 
-    cmd.extend(other_args.split())
+    cmd.extend(other_args)
     exit_on_error(run_cmd(cmd, "pip download"))
 
 

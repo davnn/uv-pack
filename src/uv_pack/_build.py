@@ -6,7 +6,12 @@ from packaging.utils import parse_wheel_filename
 from uv_pack._process import exit_on_error, run_cmd
 
 
-def build_src_wheel(*, source_path: Path, out_path: Path, other_args: str) -> None:
+def build_src_wheel(
+    *,
+    source_path: Path,
+    out_path: Path,
+    other_args: list[str],
+) -> None:
     cmd = [
         "uv",
         "build",
@@ -16,7 +21,7 @@ def build_src_wheel(*, source_path: Path, out_path: Path, other_args: str) -> No
         str(out_path),
     ]
 
-    cmd.extend(other_args.split())
+    cmd.extend(other_args)
     exit_on_error(run_cmd(cmd, "uv build"))
 
 
