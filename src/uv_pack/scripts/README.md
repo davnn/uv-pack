@@ -25,8 +25,17 @@ Both scripts implement the same behavior and differ only in platform syntax.
 
 - `BASE_PY` (optional)
   Explicit path to a Python interpreter to use as the venv base.
-  Required **only if** no bundled Python archive is found, otherwise
-  overrides a found (unpacked) archive.
+  If not set and no bundled Python is found, the scripts will search for
+  a system python and ask for confirmation.
+
+---
+
+## Features
+
+- **Automatic uv Setup**: Installs `uv` from a bundled wheel if not found in the environment.
+- **Fast Installation**: Uses `uv` for environment creation and package installation if available.
+- **Environment Reuse**: Skips virtual environment creation if `VENV_DIR` already exists.
+- **Interactive Python Discovery**: Searches for system Python if no base interpreter is specified.
 
 ---
 
@@ -49,3 +58,4 @@ Expected layout relative to `PACK_DIR`:
 - Archive extraction is guarded by interpreter discovery, not file presence
 - `ensurepip` failures are ignored consistently across platforms
 - No network access is required at any stage
+- Uses `uv` if available for significantly faster unpacking
