@@ -104,8 +104,10 @@ PowerShell:
 ```
 
 All scripts also accept `VENV_DIR`, `PYTHON_DIR` and `BASE_PY` environment variables.
-Use `BASE_PY` when you skipped the `python` step during packing to provide a system
-python interpreter. `VENV_DIR` (default = `.venv`) and `PYTHON_DIR` (default = `.python`)
+Use `BASE_PY` when you skipped the `python` step during packing to provide a specific
+system python interpreter. If `BASE_PY` is not set and no bundled python is found,
+the scripts will search for a system python and ask for confirmation.
+`VENV_DIR` (default = `.venv`) and `PYTHON_DIR` (default = `.python`)
 can be used to customize the target python and venv directory. Set `VENV_DIR=""` to
 skip creating a virtual environment and install directly into `BASE_PY`.
 
@@ -154,7 +156,9 @@ download (``pip download``), you can specify them as:
 
 #### How do I skip bundling Python?
 
-Skip the `python` step: ``uv-pack --skip python``. When unpacking, set `BASE_PY` to a system Python path.
+Skip the `python` step: ``uv-pack --skip python``. When unpacking, the script will
+automatically search for a system python and ask for confirmation if `BASE_PY` is not set.
+You can also explicitly set `BASE_PY` to a system Python path.
 
 #### How do I install directly into a system Python instead of creating `.venv`?
 

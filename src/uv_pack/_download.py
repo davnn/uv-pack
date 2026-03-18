@@ -35,6 +35,29 @@ def download_third_party_wheels(
     exit_on_error(run_cmd(cmd, "pip download"))
 
 
+def download_uv_wheel(
+    *,
+    output_directory: Path,
+) -> None:
+    cmd = [
+        "uv",
+        "run",
+        "--with",
+        "pip",
+        "python",
+        "-m",
+        "pip",
+        "download",
+        "--prefer-binary",
+        "--no-deps",
+        "--disable-pip-version-check",
+        "uv",
+        "-d",
+        str(output_directory),
+    ]
+    exit_on_error(run_cmd(cmd, "pip download uv"))
+
+
 def determine_download_requirements(
     *,
     requirements_file: Path,
