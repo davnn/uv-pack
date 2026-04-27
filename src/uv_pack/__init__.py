@@ -34,7 +34,7 @@ from uv_pack._export import export_local_requirements, export_requirements
 from uv_pack._files import PackLayout
 from uv_pack._logging import ConsoleError, Verbosity, console_print, set_verbosity
 from uv_pack._process import run_step
-from uv_pack._python import download_latest_python_build
+from uv_pack._python import PythonFlavor, download_latest_python_build
 from uv_pack._scripts import copy_unpack_scripts
 
 # -----------------------------------------------------------------------------
@@ -145,6 +145,14 @@ def pack(
         default="",
         help=_additional_cli_args("uv build"),
     ),
+    python_flavor: PythonFlavor | None = typer.Option(
+        None,
+        "--python-flavor",
+        help=(
+            "Override the embedded Python ABI flavor to download "
+            "('gil' or 'freethreaded'). Defaults to the running interpreter."
+        ),
+    ),
     verbose: bool = typer.Option(
         False,
         "--verbose",
@@ -248,6 +256,7 @@ def pack(
         pack.python_dir.mkdir(exist_ok=True)
         python_path = download_latest_python_build(
             dest_dir=pack.python_dir,
+            python_flavor=python_flavor,
         )
         console_print(
             f"[green]✔ Python[/green] archive: '{python_path}'",
