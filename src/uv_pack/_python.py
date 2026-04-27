@@ -53,7 +53,11 @@ def is_freethreaded_python() -> bool:
         return True
 
     soabi = sysconfig.get_config_var("SOABI")
-    if isinstance(soabi, str) and re.search(r"cpython-\d+t(?:-|$)", soabi, re.IGNORECASE):
+    if isinstance(soabi, str) and re.search(
+        r"cpython-\d+t(?:-|$)",
+        soabi,
+        re.IGNORECASE,
+    ):
         return True
 
     cache_tag = sys.implementation.cache_tag
@@ -125,7 +129,9 @@ def find_latest_python_build(
         ):
             return asset["browser_download_url"]
 
-    msg = f"No asset found for Python {python_version} ({python_flavor}) on {target_arch}"
+    msg = (
+        f"No asset found for Python {python_version} ({python_flavor}) on {target_arch}"
+    )
     raise RuntimeError(msg)
 
 
