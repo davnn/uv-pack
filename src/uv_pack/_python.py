@@ -61,6 +61,8 @@ def is_freethreaded_python() -> bool:
         return True
 
     cache_tag = sys.implementation.cache_tag
+    if not isinstance(cache_tag, str):
+        return False
     return bool(re.search(r"cpython-\d+t$", cache_tag, re.IGNORECASE))
 
 
