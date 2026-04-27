@@ -52,6 +52,7 @@ Options:
 - `-s, --skip`: skip a pipeline step (can be supplied multiple times)
 - `-o, --output-directory`: path to output directory (default: `./pack`)
 - `-v, --verbose`: show more detailed pack progress logging
+- `--python-flavor`: override the embedded Python ABI flavor to `gil` or `freethreaded`
 - `--uv-build`: extra args passed to `uv build`
 - `--uv-export`: extra args passed to `uv export`
 - `--pip-download`: extra args passed to `pip download`
@@ -61,7 +62,7 @@ Pipeline steps:
 - `export`: write `requirements.txt` files for third-party and local packages
 - `download`: download third-party wheels and sources
 - `build`: build local wheels and compile the combined requirements file
-- `python`: download a python-build-standalone archive for the current Python version and platform
+- `python`: download a python-build-standalone archive for the current Python version, platform, and ABI flavor
 
 Example
 -------
@@ -70,6 +71,8 @@ Example
 uv-pack --verbose
 # only clean and export the requirements
 uv-pack clean export
+# force the embedded interpreter to use the regular GIL build
+uv-pack --python-flavor gil
 ```
 
 Output layout
