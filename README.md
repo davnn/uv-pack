@@ -52,7 +52,6 @@ Options:
 - `-s, --skip`: skip a pipeline step (can be supplied multiple times)
 - `-o, --output-directory`: path to output directory (default: `./pack`)
 - `-v, --verbose`: show more detailed pack progress logging
-- `--python-flavor`: override the embedded Python ABI flavor to `gil` or `freethreaded`
 - `--uv-build`: extra args passed to `uv build`
 - `--uv-export`: extra args passed to `uv export`
 - `--pip-download`: extra args passed to `pip download`
@@ -71,8 +70,6 @@ Example
 uv-pack --verbose
 # only clean and export the requirements
 uv-pack clean export
-# force the embedded interpreter to use the regular GIL build
-uv-pack --python-flavor gil
 ```
 
 Output layout
@@ -129,6 +126,7 @@ Limitations
   because ``uv`` exports relative paths to the project root.
 - The build platform is expected to equal the usage platform; it is currently not possible to pack an environment
   for a different platform.
+- The embedded Python ABI flavor is inferred from the interpreter running `uv-pack`. Run `uv-pack` with free-threaded Python to produce a free-threaded pack.
 - The project Python version is ignored when running `uv-pack` as a tool (`uv tool run` or `uvx`) and should be
   specified using `uv tool run --python 3.11 uv-pack` or `uvx --python 3.11 uv-pack`, see
   [uv#uv5951](https://github.com/astral-sh/uv/issues/5951) and [uv#8206](https://github.com/astral-sh/uv/issues/8206).

@@ -5,7 +5,7 @@ import sys
 import sysconfig
 from enum import Enum
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 from urllib.parse import unquote
 
 import requests
@@ -60,16 +60,17 @@ def is_freethreaded_python() -> bool:
     ):
         return True
 
-    cache_tag = sys.implementation.cache_tag
+    # apparently the cache tag can be None on some non-CPython interpreters
+    cache_tag = cast("str | None", sys.implementation.cache_tag)
     if not isinstance(cache_tag, str):
         return False
+
     return bool(re.search(r"cpython-\d+t$", cache_tag, re.IGNORECASE))
 
 
 def download_latest_python_build(
     *,
     dest_dir: Path,
-    python_flavor: PythonFlavor | None = None,
     target_format: Literal[
         "install_only",
         "install_only_stripped",
@@ -80,11 +81,9 @@ def download_latest_python_build(
     Returns the downloaded file path.
     """
     session = session_with_retries()
-    python_flavor = python_flavor or resolve_python_flavor()
     url = find_latest_python_build(
         python_version=f"{sys.version_info.major}.{sys.version_info.minor}",
         target_arch=resolve_platform(),
-        python_flavor=python_flavor,
         target_format=target_format,
         session=session,
     )
@@ -100,7 +99,6 @@ def find_latest_python_build(
     python_version: str,
     target_arch: str,
     *,
-    python_flavor: PythonFlavor | None = None,
     target_format: Literal[
         "install_only",
         "install_only_stripped",
@@ -108,7 +106,7 @@ def find_latest_python_build(
     session: requests.Session | None = None,
 ) -> str:
     session = session or requests.Session()
-    python_flavor = python_flavor or resolve_python_flavor()
+    python_flavor = resolve_python_flavor()
     release_api = os.getenv("UV_PYTHON_INSTALL_MIRROR", LATEST_RELEASE_API)
 
     resp = session.get(release_api, timeout=10)
