@@ -1,8 +1,10 @@
 import os
 import platform
 import re
+import shutil
 import sys
 import sysconfig
+import tempfile
 from enum import Enum
 from pathlib import Path
 from typing import Literal, cast
@@ -68,6 +70,22 @@ def is_freethreaded_python() -> bool:
     return bool(re.search(r"cpython-\d+t$", cache_tag, re.IGNORECASE))
 
 
+def get_cache_dir() -> Path:
+    """Get the global cache directory for uv-pack."""
+    if platform.system() == "Windows":
+        # Use %TEMP% on Windows
+        base = Path(os.getenv("TEMP", tempfile.gettempdir()))
+    else:
+        # Use /var/tmp on Linux/macOS for persistent temporary storage
+        base = Path("/var/tmp")
+        if not os.access(base, os.W_OK):
+            base = Path(tempfile.gettempdir())
+
+    cache_dir = base / "uv-pack"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir
+
+
 def download_latest_python_build(
     *,
     dest_dir: Path,
@@ -78,7 +96,7 @@ def download_latest_python_build(
 ) -> Path:
     """Resolve and download the latest python-build-standalone artifact.
 
-    Returns the downloaded file path.
+    Returns the downloaded file path in the project dest_dir.
     """
     session = session_with_retries()
     url = find_latest_python_build(
@@ -88,11 +106,26 @@ def download_latest_python_build(
         session=session,
     )
     console_print(f"[dim]Resolved asset:[/dim] {url}", level=Verbosity.verbose)
-    return download_with_progress(
+
+    # Use global cache
+    cache_dir = get_cache_dir()
+    cached_path = download_with_progress(
         url=url,
-        dest_dir=dest_dir,
+        dest_dir=cache_dir,
         session=session,
     )
+
+    # Copy from cache to project destination
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    project_path = dest_dir / cached_path.name
+
+    if not project_path.exists():
+        console_print(f"[dim]Copying from cache:[/dim] {cached_path.name}", level=Verbosity.verbose)
+        shutil.copy2(cached_path, project_path)
+    else:
+        console_print(f"[dim]Using existing file in destination:[/dim] {project_path.name}", level=Verbosity.verbose)
+
+    return project_path
 
 
 def find_latest_python_build(

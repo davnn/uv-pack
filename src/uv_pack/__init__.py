@@ -29,7 +29,7 @@ from pathlib import Path
 import typer
 
 from uv_pack._build import build_requirements, build_src_wheel
-from uv_pack._download import download_third_party_wheels
+from uv_pack._download import download_third_party_wheels, download_uv_wheel
 from uv_pack._export import export_local_requirements, export_requirements
 from uv_pack._files import PackLayout
 from uv_pack._logging import ConsoleError, Verbosity, console_print, set_verbosity
@@ -151,6 +151,11 @@ def pack(
         "-v",
         help="Enable verbose output",
     ),
+    with_uv: bool = typer.Option(
+        False,
+        "--with-uv",
+        help="Include uv wheel in the bundle for high-speed installation",
+    ),
 ) -> None:
     """Pack a locked uv environment into an offline-installable bundle."""
     set_verbosity(Verbosity.verbose if verbose else Verbosity.normal)
@@ -195,11 +200,15 @@ def pack(
         _raise_requirement_txt_missing(pack.requirements_export_txt)
 
         with run_step("download"):
+            if with_uv:
+                download_uv_wheel(output_directory=pack.wheels_dir)
+
             download_third_party_wheels(
                 requirements_file=pack.requirements_export_txt,
                 wheels_directory=pack.wheels_dir,
                 other_args=pip_download,
             )
+
 
     if Step.build in selected_steps:
         _raise_requirement_txt_missing(pack.requirements_local_txt)
