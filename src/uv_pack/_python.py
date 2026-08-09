@@ -2,8 +2,10 @@ import os
 import platform
 import re
 import sys
+import sysconfig
+from enum import Enum
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 from urllib.parse import unquote
 
 import requests
@@ -23,12 +25,47 @@ from urllib3.util.retry import Retry
 from uv_pack._logging import ConsoleError, Verbosity, console_print
 
 __all__ = [
+    "PythonFlavor",
     "download_latest_python_build",
 ]
 
 LATEST_RELEASE_API = (
     "https://api.github.com/repos/astral-sh/python-build-standalone/releases/latest"
 )
+
+
+class PythonFlavor(str, Enum):
+    """Selectable CPython ABI flavors for python-build-standalone assets."""
+
+    gil = "gil"
+    freethreaded = "freethreaded"
+
+
+def resolve_python_flavor() -> PythonFlavor:
+    return PythonFlavor.freethreaded if is_freethreaded_python() else PythonFlavor.gil
+
+
+def is_freethreaded_python() -> bool:
+    if sysconfig.get_config_var("Py_GIL_DISABLED"):
+        return True
+
+    if "t" in getattr(sys, "abiflags", ""):
+        return True
+
+    soabi = sysconfig.get_config_var("SOABI")
+    if isinstance(soabi, str) and re.search(
+        r"cpython-\d+t(?:-|$)",
+        soabi,
+        re.IGNORECASE,
+    ):
+        return True
+
+    # apparently the cache tag can be None on some non-CPython interpreters
+    cache_tag = cast("str | None", sys.implementation.cache_tag)
+    if not isinstance(cache_tag, str):
+        return False
+
+    return bool(re.search(r"cpython-\d+t$", cache_tag, re.IGNORECASE))
 
 
 def download_latest_python_build(
@@ -69,6 +106,7 @@ def find_latest_python_build(
     session: requests.Session | None = None,
 ) -> str:
     session = session or requests.Session()
+    python_flavor = resolve_python_flavor()
     release_api = os.getenv("UV_PYTHON_INSTALL_MIRROR", LATEST_RELEASE_API)
 
     resp = session.get(release_api, timeout=10)
@@ -82,14 +120,18 @@ def find_latest_python_build(
 
     for asset in release.get("assets", []):
         name = asset["name"]
+        is_freethreaded_asset = "freethreaded" in name.lower()
         if (
-            py_pattern.search(name)
+            is_freethreaded_asset == (python_flavor == PythonFlavor.freethreaded)
+            and py_pattern.search(name)
             and target_arch in name
             and name.endswith(f"{target_format}.tar.gz")
         ):
             return asset["browser_download_url"]
 
-    msg = f"No asset found for Python {python_version} on {target_arch}"
+    msg = (
+        f"No asset found for Python {python_version} ({python_flavor}) on {target_arch}"
+    )
     raise RuntimeError(msg)
 
 

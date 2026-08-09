@@ -23,16 +23,16 @@ jobs:
     setup:
         runs-on: ${{ inputs.os }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v6
 
             - name: Install Task
-              uses: arduino/setup-task@v1
+              uses: go-task/setup-task@v2
               with:
                   version: 3.x
                   repo-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install UV
-              uses: astral-sh/setup-uv@v6
+              uses: astral-sh/setup-uv@v8.1.0
               with:
                   enable-cache: true
                   python-version: ${{ inputs.python }}
