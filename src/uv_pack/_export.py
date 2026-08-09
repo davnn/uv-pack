@@ -6,7 +6,7 @@ from uv_pack._process import exit_on_error, run_cmd
 def export_requirements(
     *,
     requirements_file: Path,
-    other_args: str,
+    other_args: list[str],
 ) -> None:
     cmd = [
         "uv",
@@ -20,14 +20,14 @@ def export_requirements(
         f"--output-file={requirements_file}",
     ]
 
-    cmd.extend(other_args.split())
+    cmd.extend(other_args)
     exit_on_error(run_cmd(cmd, "uv export"))
 
 
 def export_local_requirements(
     *,
     requirements_file: Path,
-    other_args: str,
+    other_args: list[str],
 ) -> None:
     """Export only local packages to a plain requirements.txt file (each line is a local requirement path)."""
     cmd = [
@@ -44,5 +44,5 @@ def export_local_requirements(
         f"--output-file={requirements_file}",
     ]
 
-    cmd.extend(other_args.split())
+    cmd.extend(other_args)
     exit_on_error(run_cmd(cmd, "uv export"))

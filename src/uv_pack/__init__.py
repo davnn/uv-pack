@@ -91,7 +91,10 @@ PIPELINE_ORDER: tuple[Step, ...] = (
 
 
 def _additional_cli_args(cmd_name: str) -> str:
-    return f"Additional command line arguments to be provided to '{cmd_name}'"
+    return (
+        f"Additional argument to provide to '{cmd_name}'. "
+        "Repeat the option to pass multiple arguments."
+    )
 
 
 def _normalize_steps(
@@ -133,16 +136,16 @@ def pack(
         "-o",
         help="Path to output directory",
     ),
-    uv_export: str = typer.Option(
-        default="",
+    uv_export: list[str] = typer.Option(
+        default_factory=list,
         help=_additional_cli_args("uv export"),
     ),
-    pip_download: str = typer.Option(
-        default="",
+    pip_download: list[str] = typer.Option(
+        default_factory=list,
         help=_additional_cli_args("pip download"),
     ),
-    uv_build: str = typer.Option(
-        default="",
+    uv_build: list[str] = typer.Option(
+        default_factory=list,
         help=_additional_cli_args("uv build"),
     ),
     verbose: bool = typer.Option(
